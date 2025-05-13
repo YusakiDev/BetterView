@@ -15,6 +15,9 @@ paper-base = "1.21.1-R0.1-SNAPSHOT"
 paper-v1211 = "1.21.1-R0.1-SNAPSHOT"
 
 # fabric
+fabric-loader = "0.16.14"
+minecraft-v1211 = "1.21.1"
+parchment-v1211 = "2024.11.17"
 
 [plugins]
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
@@ -32,3 +35,6 @@ checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "ch
 paper-api-base = { module = "io.papermc.paper:paper-api", version.ref = "paper-base" }
 
 # fabric
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+minecraft-v1211 = { module = "com.mojang:minecraft", version.ref = "minecraft-v1211" }
+parchment-v1221 = { module = "org.parchmentmc.data:parchment-1.21.1", version.ref = "parchment-v1211" }
