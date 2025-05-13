@@ -47,6 +47,19 @@ subprojects {
 
     tasks.withType<Jar> {
         archiveBaseName = "${rootProject.name}-${project.name}".lowercase()
+
+        // include GPL license file and optional LGPL license file,
+        // if the specific subproject is licensed as LGPL (e.g. required for fabric)
+        sequenceOf(
+            rootProject.layout.projectDirectory.file("LICENSE"),
+            project.layout.projectDirectory.file("LICENSE.LESSER"),
+        )
+            .filter { it.asFile.exists() }
+            .forEach { file ->
+                from(file) {
+                    rename { return@rename "${rootProject.name.uppercase()}_${it}" }
+                }
+            }
     }
 }
 

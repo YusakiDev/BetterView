@@ -7,6 +7,7 @@ plugins {
 }
 
 dependencies {
+    compileOnly(libs.paper.api.base)
     implementation(projects.paperCommon)
 
     sequenceOf("1.21.1")
@@ -16,7 +17,8 @@ dependencies {
 
 tasks.withType<ShadowJar> {
     destinationDirectory = rootProject.layout.buildDirectory.dir("libs")
-    from(rootProject.layout.projectDirectory.file("LICENSE"))
+    // this subproject can't be licensed as LGPL as the paper api is GPL
+    exclude("${rootProject.name.uppercase()}_LICENSE.LESSER")
 }
 
 tasks.named("assemble") {
