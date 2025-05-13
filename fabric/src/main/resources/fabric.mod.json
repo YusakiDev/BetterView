@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "betterview",
+  "version": "${version}",
+  "name": "BetterView",
+
+  "icon": "assets/betterview/icon.png",
+  "description": "Implements asynchronous lightweight view distance",
+  "authors": [
+    "booky10"
+  ],
+
+  "license": "LGPL-3.0-only",
+  "environment": "server",
+
+  "depends": {
+    "java": ">=21"
+  }
+}

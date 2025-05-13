@@ -16,6 +16,7 @@ paper-v1211 = "1.21.1-R0.1-SNAPSHOT"
 
 # fabric
 fabric-loader = "0.16.14"
+minecraft-base = "1.21.1"
 minecraft-v1211 = "1.21.1"
 parchment-v1211 = "2024.11.17"
 
@@ -36,5 +37,6 @@ paper-api-base = { module = "io.papermc.paper:paper-api", version.ref = "paper-b
 
 # fabric
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+minecraft-base = { module = "com.mojang:minecraft", version.ref = "minecraft-base" }
 minecraft-v1211 = { module = "com.mojang:minecraft", version.ref = "minecraft-v1211" }
 parchment-v1221 = { module = "org.parchmentmc.data:parchment-1.21.1", version.ref = "parchment-v1211" }

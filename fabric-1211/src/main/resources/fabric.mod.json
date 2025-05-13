@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "betterview-mc1211",
+  "version": "${version}",
+  "name": "BetterView 1.21.1",
+
+  "icon": "assets/betterview/icon.png",
+  "description": "Implements asynchronous lightweight view distance for 1.21.1",
+  "authors": [
+    "booky10"
+  ],
+
+  "license": "LGPL-3.0-only",
+  "environment": "server",
+  "accessWidener": "betterview.accesswidener",
+
+  "mixins": [
+    "betterview.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": ">=1.21",
+    "java": ">=21",
+    "moonrise": "*"
+  },
+
+  "custom": {
+    "modmenu": {
+      "parent": "betterview"
+    }
+  }
+}

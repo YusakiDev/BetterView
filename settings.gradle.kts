@@ -19,3 +19,4 @@ sequenceOf("1.21.1")
 sequenceOf("1.21.1")
     .map { it.replace(".", "") }
     .forEach { include("fabric-$it") }
+include("fabric")

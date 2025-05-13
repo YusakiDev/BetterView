@@ -1,3 +1,7 @@
+import net.fabricmc.loom.task.AbstractRemapJarTask
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.withType
+
 plugins {
     alias(libs.plugins.loom)
 }
@@ -16,4 +20,12 @@ tasks.named<ProcessResources>("processResources") {
     filesMatching("fabric.mod.json") {
         expand("version" to project.version)
     }
+}
+
+tasks.withType<AbstractRemapJarTask> {
+    archiveBaseName = "${rootProject.name}-${project.name}".lowercase()
+}
+
+loom {
+    mixin.defaultRefmapName = "${rootProject.name}-${project.name}-refmap.json".lowercase()
 }
