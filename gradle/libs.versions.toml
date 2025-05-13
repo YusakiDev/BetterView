@@ -1,0 +1,34 @@
+[versions]
+# plugins
+paperweight = "2.0.0-beta.16"
+shadow = "8.3.6"
+loom = "1.10-SNAPSHOT"
+pluginyml = "0.6.0"
+
+# common
+slf4j = "2.0.17"
+jspecify = "1.0.0"
+checker-qual = "3.49.3"
+
+# paper
+paper-base = "1.21.1-R0.1-SNAPSHOT"
+paper-v1211 = "1.21.1-R0.1-SNAPSHOT"
+
+# fabric
+
+[plugins]
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+loom = { id = "fabric-loom", version.ref = "loom" }
+pluginyml-bukkit = { id = "net.minecrell.plugin-yml.bukkit", version.ref = "pluginyml" }
+
+[libraries]
+# common
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
+checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-qual" }
+
+# paper
+paper-api-base = { module = "io.papermc.paper:paper-api", version.ref = "paper-base" }
+
+# fabric
