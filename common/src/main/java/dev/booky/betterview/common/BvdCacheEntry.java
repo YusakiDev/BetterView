@@ -2,8 +2,8 @@ package dev.booky.betterview.common;
 // Created by booky10 in TJCServer (21:07 12.05.2025)
 
 import dev.booky.betterview.common.hooks.ChunkHook;
-import dev.booky.betterview.common.util.McChunkPos;
 import dev.booky.betterview.common.hooks.LevelHook;
+import dev.booky.betterview.common.util.McChunkPos;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.util.ReferenceCountUtil;

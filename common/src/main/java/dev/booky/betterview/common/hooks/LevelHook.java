@@ -1,6 +1,8 @@
 package dev.booky.betterview.common.hooks;
 // Created by booky10 in BetterView (14:08 03.06.2025)
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import dev.booky.betterview.common.BvdCacheEntry;
 import dev.booky.betterview.common.config.BvLevelConfig;
 import dev.booky.betterview.common.util.McChunkPos;
 import io.netty.buffer.ByteBuf;
@@ -25,6 +27,8 @@ public interface LevelHook {
     // } else if (level.bvdGeneratedChunks.getAndIncrement() > level.tjcConfig.bvdMaxGeneratedChunksTick) {
     boolean checkChunkGeneration();
 
+    void resetChunkGeneration();
+
     ByteBuf getEmptyChunkBuf(McChunkPos chunkPos);
 
     boolean isVoidWorld();
@@ -35,4 +39,6 @@ public interface LevelHook {
     int getBetterViewDistance();
 
     BvLevelConfig getConfig();
+
+    LoadingCache<McChunkPos, BvdCacheEntry> getBvdCache();
 }

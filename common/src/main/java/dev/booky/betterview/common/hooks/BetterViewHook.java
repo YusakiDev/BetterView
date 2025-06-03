@@ -4,8 +4,18 @@ package dev.booky.betterview.common.hooks;
 import dev.booky.betterview.common.config.BvGlobalConfig;
 import org.jspecify.annotations.NullMarked;
 
+import java.util.List;
+
 @NullMarked
 public interface BetterViewHook {
 
+    boolean checkChunkGeneration();
+
     BvGlobalConfig getConfig();
+
+    long getNanosPerServerTick();
+
+    List<? extends LevelHook> getLevels();
+
+    List<? extends PlayerHook> getPlayers();
 }

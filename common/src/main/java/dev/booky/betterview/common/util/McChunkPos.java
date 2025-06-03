@@ -24,6 +24,12 @@ public final class McChunkPos {
         this.key = getChunkKey(posX, posZ);
     }
 
+    public McChunkPos(long key) {
+        this.posX = getChunkX(key);
+        this.posZ = getChunkZ(key);
+        this.key = key;
+    }
+
     public static long getChunkKey(int posX, int posZ) {
         return ((long) posZ << Integer.SIZE) | posX;
     }

@@ -12,6 +12,7 @@ checker-qual = "3.49.3"
 netty = "4.1.121.Final"
 caffeine = "3.2.0"
 configurate = "4.2.0"
+fastutil = "8.5.15"
 
 # paper
 paper-base = "1.21.1-R0.1-SNAPSHOT"
@@ -35,8 +36,10 @@ slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-qual" }
 netty-buffer = { module = "io.netty:netty-buffer", version.ref = "netty" }
+netty-transport = { module = "io.netty:netty-transport", version.ref = "netty" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
+fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
 
 # paper
 paper-api-base = { module = "io.papermc.paper:paper-api", version.ref = "paper-base" }

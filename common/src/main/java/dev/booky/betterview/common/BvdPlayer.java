@@ -2,6 +2,8 @@ package dev.booky.betterview.common;
 
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.hooks.PlayerHook;
+import dev.booky.betterview.common.util.BetterViewUtil;
+import dev.booky.betterview.common.util.ChunkIterationUtil;
 import dev.booky.betterview.common.util.McChunkPos;
 import io.netty.buffer.ByteBuf;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -19,7 +21,7 @@ import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.BVD_LOADED;
 import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.BVD_QUEUED;
 import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.SERVER_LOADED;
 import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.UNLOADED;
-import static dev.booky.betterview.common.BvdUtilities.MAX_LEVEL_SIZE_CHUNKS;
+import static dev.booky.betterview.common.util.BetterViewUtil.MC_MAX_DIMENSION_SIZE_CHUNKS;
 
 @NullMarked
 public final class BvdPlayer {
@@ -32,7 +34,7 @@ public final class BvdPlayer {
 
     // the last dimension the player was in; this is used to determine whether
     // the client will discard all chunks or not
-    public Object networkDimension;
+    private Object networkDimension;
 
     // a list of chunk offsets which are ordered correctly and
     // can all be sent - as long as they are in bounds of the worldborder
@@ -112,7 +114,7 @@ public final class BvdPlayer {
     public boolean serverChunkRemove(McChunkPos chunkPos) {
         int chunkX = chunkPos.getX();
         int chunkZ = chunkPos.getZ();
-        boolean insideCylinder = BvdUtilities.isWithinRange(
+        boolean insideCylinder = BetterViewUtil.isWithinRange(
                 chunkX - this.chunkPos.getX(),
                 chunkZ - this.chunkPos.getZ(),
                 this.distance);
@@ -148,7 +150,7 @@ public final class BvdPlayer {
         this.storageRadius = Math.max(2, newDistance) + 3;
         this.storageDiameter = this.storageRadius * 2 + 1;
         // update sorted chunk delta array, thanks moonrise!
-        this.chunksInDistance = BvdUtilities.BVD_RADIUS_ITERATION_LIST[newDistance];
+        this.chunksInDistance = ChunkIterationUtil.BVD_RADIUS_ITERATION_LIST[newDistance];
         this.iterationIndex = 0;
 
         // migrate storage array
@@ -186,7 +188,7 @@ public final class BvdPlayer {
         if (newLevel != this.level) {
             this.level = newLevel;
             if (this.enabled) {
-                this.handleDimensionReset();
+                this.handleDimensionReset(null);
             }
             return;
         }
@@ -219,7 +221,7 @@ public final class BvdPlayer {
                 }
                 int chunkX = state.chunkX;
                 int chunkZ = state.chunkZ;
-                boolean keepLoaded = BvdUtilities.isWithinRange(chunkX - centerX,
+                boolean keepLoaded = BetterViewUtil.isWithinRange(chunkX - centerX,
                         chunkZ - centerZ, this.distance);
                 if (keepLoaded) {
                     continue; // keep chunk loaded, still within range
@@ -257,8 +259,8 @@ public final class BvdPlayer {
             }
 
             // ensure the chunk is in the world boundaries; this will likely never occur
-            if (chunkX < -MAX_LEVEL_SIZE_CHUNKS || chunkX > MAX_LEVEL_SIZE_CHUNKS
-                    || chunkZ < -MAX_LEVEL_SIZE_CHUNKS || chunkZ > MAX_LEVEL_SIZE_CHUNKS) {
+            if (chunkX < -MC_MAX_DIMENSION_SIZE_CHUNKS || chunkX > MC_MAX_DIMENSION_SIZE_CHUNKS
+                    || chunkZ < -MC_MAX_DIMENSION_SIZE_CHUNKS || chunkZ > MC_MAX_DIMENSION_SIZE_CHUNKS) {
                 continue; // out of bounds, next one
             }
 
@@ -319,7 +321,7 @@ public final class BvdPlayer {
         ByteBuf finalChunkBuf = chunkBuf.isReadable()
                 ? chunkBuf.retainedSlice()
                 : this.level.getEmptyChunkBuf(chunkPos);
-        this.player.sendPacketBuf(finalChunkBuf);
+        this.player.getNettyChannel().write(finalChunkBuf);
         state.lifecycle = BVD_LOADED; // mark chunk as loaded by bvd
         return true;
     }
@@ -347,7 +349,14 @@ public final class BvdPlayer {
         this.chunkQueue.clear();
     }
 
-    public void handleDimensionReset() {
+    public void handleDimensionReset(@Nullable Object networkDimension) {
+        if (networkDimension != null) {
+            if (this.networkDimension.equals(networkDimension)) {
+                return; // nothing to do
+            }
+            this.networkDimension = networkDimension; // update dimension
+        }
+
         // don't sent any unload packets on bulk unload
         for (int i = 0, len = this.chunkStates.length; i < len; i++) {
             this.chunkStates[i].set(0, 0, UNLOADED);

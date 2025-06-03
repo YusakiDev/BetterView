@@ -56,26 +56,6 @@ public final class BvdUtilities {
     private static final ByteBuf FORGET_LEVEL_CHUNK_PACKET_ID = Unpooled.wrappedBuffer(new byte[]{0x22});
     private static final ByteBuf LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = Unpooled.wrappedBuffer(new byte[]{0x28});
 
-    public static final int MAX_CHUNK_DISTANCE = 128;
-    // use moonrise's ParallelSearchRadiusIteration generation to make this more FAF (fast-as-fuck)
-    static final long[][] BVD_RADIUS_ITERATION_LIST = Util.make(() -> {
-        long[][] list = new long[MAX_CHUNK_DISTANCE + 2 + 1][];
-        for (int radius = 0; radius < list.length; radius++) {
-            int finalRadius = radius;
-            list[radius] = Arrays.stream(ParallelSearchRadiusIteration.generateBFSOrder(radius))
-                    .mapToObj(McChunkPos::new)
-                    .filter(pos -> isWithinRange(
-                            pos.x, pos.z, finalRadius))
-                    // .sorted(Comparator.comparingInt(p -> p.x * p.x + p.z * p.z))
-                    .mapToLong(McChunkPos::getKey)
-                    .toArray();
-        }
-        return list;
-    });
-
-    // limit everything to minecraft's max dimension size
-    static final int MAX_LEVEL_SIZE_CHUNKS = Level.MAX_LEVEL_SIZE << 4;
-
     private BvdUtilities() {
     }
 
@@ -356,21 +336,5 @@ public final class BvdUtilities {
         writeBitSet(buf, blockEmpty.toLongArray());
         buf.writeByte(0); // sky light data length
         writeByteArrayList(buf, blockData);
-    }
-
-    public static boolean isWithinRange(int posX, int posZ, int viewDistance) {
-        int absX = Math.abs(posX);
-        int absZ = Math.abs(posZ);
-        // check done by extra moonrise logic
-        int squareDist = Math.max(absX, absZ);
-        if (squareDist > viewDistance + 1) {
-            return false; // outside square distance
-        }
-        // check done by vanilla server logic
-        long distX = Math.max(0, absX - 2);
-        long distZ = Math.max(0, absZ - 2);
-        long distXZSqrt = distX * distX + distZ * distZ;
-        int viewDistanceSqrt = viewDistance * viewDistance;
-        return distXZSqrt < viewDistanceSqrt; // outside cylindrical distance
     }
 }
