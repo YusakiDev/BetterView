@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.paperweight.userdev) apply false
     alias(libs.plugins.loom) apply false
     alias(libs.plugins.pluginyml.bukkit) apply false
+    alias(libs.plugins.runtask.paper) apply false
 }
 
 allprojects {
@@ -57,7 +58,7 @@ subprojects {
             .filter { it.asFile.exists() }
             .forEach { file ->
                 from(file) {
-                    rename { return@rename "${rootProject.name.uppercase()}_${it}" }
+                    rename { return@rename "${rootProject.name}_${project.name}_${it}".uppercase() }
                 }
             }
     }

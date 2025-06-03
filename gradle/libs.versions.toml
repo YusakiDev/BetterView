@@ -4,6 +4,7 @@ paperweight = "2.0.0-beta.16"
 shadow = "8.3.6"
 loom = "1.10-SNAPSHOT"
 pluginyml = "0.6.0"
+runtask = "2.3.1"
 
 # common
 slf4j = "2.0.17"
@@ -30,6 +31,7 @@ paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "pa
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 loom = { id = "fabric-loom", version.ref = "loom" }
 pluginyml-bukkit = { id = "net.minecrell.plugin-yml.bukkit", version.ref = "pluginyml" }
+runtask-paper = { id = "xyz.jpenilla.run-paper", version.ref = "runtask" }
 
 [libraries]
 # common
