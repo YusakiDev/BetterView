@@ -4,6 +4,7 @@ package dev.booky.betterview.nms.v1211;
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor;
 import ca.spottedleaf.moonrise.common.util.ChunkSystem;
 import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder;
+import dev.booky.betterview.common.BvdManager;
 import dev.booky.betterview.common.BvdPlayer;
 import dev.booky.betterview.common.util.ChunkTagResult;
 import dev.booky.betterview.common.util.McChunkPos;
@@ -161,23 +162,29 @@ public class NmsAdapter implements PaperNmsInterface {
     }
 
     @Override
-    public void injectPacketHandler(NamespacedKey listenerKey) {
+    public void injectPacketHandler(BvdManager manager, NamespacedKey listenerKey) {
         ChannelInitializeListenerHolder.addListener(listenerKey, channel -> channel.pipeline()
                 .addBefore("packet_handler", BETTERVIEW_HANDLER, new PacketHandler()));
         // inject existing connections
-        for (Connection connection : MinecraftServer.getServer().getConnection().getConnections()) {
+        MinecraftServer server = MinecraftServer.getServer();
+        for (Connection connection : server.getConnection().getConnections()) {
             connection.channel.pipeline()
-                    .addBefore("packet_handler",BETTERVIEW_HANDLER, new PacketHandler());
+                    .addBefore("packet_handler", BETTERVIEW_HANDLER, new PacketHandler());
         }
+        // inject post-join handling
+        WrappedServerTickManager.inject(server, manager);
     }
 
     @Override
     public void uninjectPacketHandler(NamespacedKey listenerKey) {
         ChannelInitializeListenerHolder.removeListener(listenerKey);
         // uninject existing connections
-        for (Connection connection : MinecraftServer.getServer().getConnection().getConnections()) {
+        MinecraftServer server = MinecraftServer.getServer();
+        for (Connection connection : server.getConnection().getConnections()) {
             connection.channel.pipeline().remove(BETTERVIEW_HANDLER);
         }
+        // uninject post-join handling
+        WrappedServerTickManager.uninject(server);
     }
 
     @Override

@@ -38,7 +38,7 @@ public class BetterViewPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new TickListener(this.manager), this);
 
         // inject packet handling
-        PaperNmsInterface.SERVICE.injectPacketHandler(this.listenerKey);
+        PaperNmsInterface.SERVICE.injectPacketHandler(this.manager, this.listenerKey);
 
         // run task after server has finished starting
         Bukkit.getScheduler().runTask(this, this.manager::onPostLoad);

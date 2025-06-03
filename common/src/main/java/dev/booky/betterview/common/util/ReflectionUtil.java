@@ -6,6 +6,7 @@ import sun.misc.Unsafe;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -62,6 +63,21 @@ public final class ReflectionUtil {
                 return TRUSTED_LOOKUP.findStatic(method.getDeclaringClass(), method.getName(), mtype);
             }
             return TRUSTED_LOOKUP.findVirtual(method.getDeclaringClass(), method.getName(), mtype);
+        } catch (ReflectiveOperationException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    public static VarHandle getField(Class<?> clazz, Class<?> type, int offset) {
+        return getField(lookupField(clazz, type, offset));
+    }
+
+    public static VarHandle getField(Field field) {
+        try {
+            if (Modifier.isStatic(field.getModifiers())) {
+                return TRUSTED_LOOKUP.findStaticVarHandle(field.getDeclaringClass(), field.getName(), field.getType());
+            }
+            return TRUSTED_LOOKUP.findVarHandle(field.getDeclaringClass(), field.getName(), field.getType());
         } catch (ReflectiveOperationException exception) {
             throw new RuntimeException(exception);
         }
