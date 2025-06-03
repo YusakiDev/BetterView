@@ -10,7 +10,7 @@
     "booky10"
   ],
 
-  "license": "LGPL-3.0-only",
+  "license": "GPL-3.0-only",
   "environment": "server",
   "accessWidener": "betterview.accesswidener",
 
