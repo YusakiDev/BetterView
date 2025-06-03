@@ -5,6 +5,8 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.tjcserver.server.TJCServerConfig;
 import de.tjcserver.server.bvd.BvdPlayer.ChunkQueueEntry;
 import de.tjcserver.server.packets.CraftPacketContext;
+import dev.booky.betterview.common.hooks.LevelHook;
+import dev.booky.betterview.common.util.McChunkPos;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.util.NettyRuntime;
@@ -49,10 +51,10 @@ public final class BvdManager {
     private BvdManager() {
     }
 
-    public static LoadingCache<ChunkPos, BvdCacheEntry> buildCache(ServerLevel level) {
+    public static LoadingCache<McChunkPos, BvdCacheEntry> buildCache(LevelHook level) {
         return Caffeine.newBuilder()
                 .expireAfterWrite(level.tjcConfig.bvdCacheTime, TimeUnit.MINUTES)
-                .<ChunkPos, BvdCacheEntry>removalListener((key, val, cause) -> {
+                .<McChunkPos, BvdCacheEntry>removalListener((key, val, cause) -> {
                     if (val != null) {
                         val.release();
                     }
@@ -155,7 +157,7 @@ public final class BvdManager {
                 break; // fail-safe to prevent OOM because of too long queue
             }
 
-            ChunkPos nextChunk = bvd.pollChunkPos();
+            McChunkPos nextChunk = bvd.pollChunkPos();
             if (nextChunk == null) {
                 break; // nothing left to process, player can see everything
             }

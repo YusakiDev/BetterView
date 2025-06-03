@@ -1,19 +1,12 @@
 package dev.booky.betterview.common;
 // Created by booky10 in TJCServer (21:07 12.05.2025)
 
-import ca.spottedleaf.concurrentutil.util.Priority;
-import ca.spottedleaf.moonrise.common.PlatformHooks;
-import de.tjcserver.server.TJCServerConfig;
 import dev.booky.betterview.common.hooks.ChunkHook;
-import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.util.McChunkPos;
+import dev.booky.betterview.common.hooks.LevelHook;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.util.ReferenceCountUtil;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -42,34 +35,27 @@ public final class BvdCacheEntry {
         // but this hasn't caused any issues yet - so I'll just assume it's thread-safe :)
         ChunkHook chunk = level.getCachedChunk(pos.getKey());
         if (chunk != null) {
-            return CompletableFuture.completedFuture(BvdChunk.chunkToBytesOrEmpty(level, chunk));
+            return CompletableFuture.completedFuture(chunk.toBytesOrEmpty());
         }
 
         // read chunk directly from storage; this is passed to an IO thread anyway, so it
         // doesn't matter that this is called off-thread I think
-        return BvdUtilities.readChunk(level, pos).thenComposeAsync(chunkTag -> {
+        return level.readChunk(pos).thenComposeAsync(chunkTag -> {
             // if the is fully lit (chunk upgrading is done while reading), create chunk data directly
-            if (chunkTag != null && BvdUtilities.isChunkLit(chunkTag)) {
-                BvdChunk bvdChunk = BvdUtilities.loadChunk(level, pos, chunkTag);
-                return CompletableFuture.completedFuture(bvdChunk == null
-                        ? Unpooled.EMPTY_BUFFER : bvdChunk.buildFullPacket(pos));
-            }
-
-            // skip useless chunk generation if this is a void world
-            if (chunkTag == null && level.voidWorld) {
+            if (chunkTag != null && chunkTag.isChunkLit()) {
+                return CompletableFuture.completedFuture(chunkTag.toBytesOrEmpty(level, pos));
+            } else if (chunkTag == null && level.isVoidWorld()) {
+                // skip useless chunk generation if this is a void world
                 return CompletableFuture.completedFuture(Unpooled.EMPTY_BUFFER);
-            }
-
-            if (BvdManager.GENERATED_CHUNKS.getAndIncrement() > TJCServerConfig.bvdMaxGeneratedChunksTick) {
-                return CompletableFuture.completedFuture(null); // global generation limit reached
-            } else if (level.bvdGeneratedChunks.getAndIncrement() > level.tjcConfig.bvdMaxGeneratedChunksTick) {
-                return CompletableFuture.completedFuture(null); // per-level generation limit reached
+            } else if (!level.checkChunkGeneration()) {
+                // we aren't allowed to generate new chunks, return null
+                return CompletableFuture.completedFuture(null);
             }
 
             // call moonrise chunk system to generate chunk to LIGHT stage
             CompletableFuture<ByteBuf> future = new CompletableFuture<>();
-            PlatformHooks.get().scheduleChunkLoad(level, pos.x, pos.z, true, ChunkStatus.LIGHT, true, Priority.LOW,
-                    generatedChunk -> future.complete(BvdChunk.chunkToBytesOrEmpty(level, generatedChunk)));
+            level.loadChunk(pos.getX(), pos.getZ(), generatedChunk ->
+                    future.complete(generatedChunk.toBytesOrEmpty()));
             return future;
         });
     }

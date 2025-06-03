@@ -5,6 +5,7 @@ import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder;
 import ca.spottedleaf.moonrise.patches.chunk_system.util.ParallelSearchRadiusIteration;
 import ca.spottedleaf.moonrise.patches.starlight.util.SaveUtil;
 import com.mojang.serialization.Codec;
+import dev.booky.betterview.common.util.McChunkPos;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -40,7 +41,6 @@ import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -63,11 +63,11 @@ public final class BvdUtilities {
         for (int radius = 0; radius < list.length; radius++) {
             int finalRadius = radius;
             list[radius] = Arrays.stream(ParallelSearchRadiusIteration.generateBFSOrder(radius))
-                    .mapToObj(ChunkPos::new)
+                    .mapToObj(McChunkPos::new)
                     .filter(pos -> isWithinRange(
                             pos.x, pos.z, finalRadius))
                     // .sorted(Comparator.comparingInt(p -> p.x * p.x + p.z * p.z))
-                    .mapToLong(ChunkPos::toLong)
+                    .mapToLong(McChunkPos::getKey)
                     .toArray();
         }
         return list;
@@ -75,10 +75,6 @@ public final class BvdUtilities {
 
     // limit everything to minecraft's max dimension size
     static final int MAX_LEVEL_SIZE_CHUNKS = Level.MAX_LEVEL_SIZE << 4;
-
-    // only allocate these empty arrays once
-    static final long[] EMPTY_LONG_ARRAY = new long[0];
-    static final BvdPlayer.ChunkState[] EMPTY_CHUNK_STATE_ARRAY = new BvdPlayer.ChunkState[0];
 
     private BvdUtilities() {
     }
@@ -96,7 +92,7 @@ public final class BvdUtilities {
         return lightVersion == SaveUtil.getLightVersion();
     }
 
-    public static CompletableFuture<@Nullable CompoundTag> readChunk(ServerLevel level, ChunkPos chunkPos) {
+    public static CompletableFuture<@Nullable CompoundTag> readChunk(ServerLevel level, McChunkPos chunkPos) {
         return level.chunkSource.chunkMap.readChunk(chunkPos)
                 .thenApply(chunkTag -> chunkTag.orElse(null));
     }
@@ -113,7 +109,7 @@ public final class BvdUtilities {
         return null;
     }
 
-    public static @Nullable BvdChunk loadChunk(ServerLevel level, ChunkPos pos, CompoundTag tag) {
+    public static @Nullable BvdChunk loadChunk(ServerLevel level, McChunkPos pos, CompoundTag tag) {
         ListTag sectionTags = tag.getList(SerializableChunkData.SECTIONS_TAG, Tag.TAG_COMPOUND);
         LevelChunkSection[] sections = new LevelChunkSection[level.getSectionsCount()];
 
@@ -217,7 +213,7 @@ public final class BvdUtilities {
                 .addComponent(true, chunkPos);
     }
 
-    public static ByteBuf getEmptyChunk(ChunkPos pos, ServerLevel level) {
+    public static ByteBuf getEmptyChunk(McChunkPos pos, ServerLevel level) {
         if (level.emptyChunkData == null) {
             throw new IllegalStateException("Tried creating empty chunk for non-void level");
         }
@@ -225,7 +221,7 @@ public final class BvdUtilities {
         return meta.addComponent(true, level.emptyChunkData.retainedSlice());
     }
 
-    public static ByteBuf buildFullChunkPacket(ChunkPos pos, BvdChunk chunk) {
+    public static ByteBuf buildFullChunkPacket(McChunkPos pos, BvdChunk chunk) {
         final CompositeByteBuf meta = buildMetaChunkPacket(pos.x, pos.z);
         return meta.addComponent(true, buildChunkPacket(chunk));
     }

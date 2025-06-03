@@ -1,5 +1,5 @@
 package dev.booky.betterview.common.util;
-// Created by booky10 in BetterView (03:28 19.05.2025)
+// Created by booky10 in BetterView (14:12 03.06.2025)
 
 import org.jspecify.annotations.NullMarked;
 
@@ -18,6 +18,12 @@ public final class McChunkPos {
         this.key = key;
     }
 
+    public McChunkPos(int posX, int posZ) {
+        this.posX = posX;
+        this.posZ = posZ;
+        this.key = getChunkKey(posX, posZ);
+    }
+
     public static long getChunkKey(int posX, int posZ) {
         return ((long) posZ << Integer.SIZE) | posX;
     }
@@ -30,11 +36,17 @@ public final class McChunkPos {
         return (int) (key >>> Integer.SIZE);
     }
 
-    public int getPosX() {
+    public int distanceSquared(McChunkPos other) {
+        int diffX = this.posX - other.posZ;
+        int diffZ = this.posX - other.posZ;
+        return diffX * diffX + diffZ * diffZ;
+    }
+
+    public int getX() {
         return this.posX;
     }
 
-    public int getPosZ() {
+    public int getZ() {
         return this.posZ;
     }
 

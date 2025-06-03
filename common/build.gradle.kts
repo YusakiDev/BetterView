@@ -3,4 +3,6 @@ dependencies {
     compileOnlyApi(libs.jspecify)
     compileOnlyApi(libs.checker.qual)
     compileOnlyApi(libs.netty.buffer)
+    api(libs.caffeine)
+    api(libs.configurate.yaml)
 }

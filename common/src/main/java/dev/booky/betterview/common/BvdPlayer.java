@@ -1,14 +1,9 @@
 package dev.booky.betterview.common;
 
-import ca.spottedleaf.moonrise.common.PlatformHooks;
-import ca.spottedleaf.moonrise.common.util.CoordinateUtils;
+import dev.booky.betterview.common.hooks.LevelHook;
+import dev.booky.betterview.common.hooks.PlayerHook;
+import dev.booky.betterview.common.util.McChunkPos;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -19,34 +14,38 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 
-import static de.tjcserver.server.bvd.BvdManager.CHUNK_QUEUE_SIZE;
-import static de.tjcserver.server.bvd.BvdPlayer.ChunkLifecycle.BVD_LOADED;
-import static de.tjcserver.server.bvd.BvdPlayer.ChunkLifecycle.BVD_QUEUED;
-import static de.tjcserver.server.bvd.BvdPlayer.ChunkLifecycle.SERVER_LOADED;
-import static de.tjcserver.server.bvd.BvdPlayer.ChunkLifecycle.UNLOADED;
-import static de.tjcserver.server.bvd.BvdUtilities.MAX_LEVEL_SIZE_CHUNKS;
+import static dev.booky.betterview.common.BvdManager.CHUNK_QUEUE_SIZE;
+import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.BVD_LOADED;
+import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.BVD_QUEUED;
+import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.SERVER_LOADED;
+import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.UNLOADED;
+import static dev.booky.betterview.common.BvdUtilities.MAX_LEVEL_SIZE_CHUNKS;
 
 @NullMarked
 public final class BvdPlayer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("BetterViewDistance");
 
+    // only allocate these empty arrays once
+    private static final long[] EMPTY_LONG_ARRAY = new long[0];
+    private static final BvdPlayer.ChunkState[] EMPTY_CHUNK_STATE_ARRAY = new BvdPlayer.ChunkState[0];
+
     // the last dimension the player was in; this is used to determine whether
     // the client will discard all chunks or not
-    public ResourceKey<Level> networkDimension;
+    public Object networkDimension;
 
     // a list of chunk offsets which are ordered correctly and
     // can all be sent - as long as they are in bounds of the worldborder
-    public long[] chunksInDistance = BvdUtilities.EMPTY_LONG_ARRAY;
+    public long[] chunksInDistance = EMPTY_LONG_ARRAY;
     // the iteration index in the above list which is kept across ticks
     public int iterationIndex;
     // the current state of chunks, this array-based layout has been inspired by
     // how the vanilla client handles storing chunks
-    public ChunkState[] chunkStates = BvdUtilities.EMPTY_CHUNK_STATE_ARRAY;
+    public ChunkState[] chunkStates = EMPTY_CHUNK_STATE_ARRAY;
 
-    public final ServerPlayer player;
-    public ServerLevel level;
-    public ChunkPos chunkPos;
+    public final PlayerHook player;
+    public LevelHook level;
+    public McChunkPos chunkPos;
 
     // a queue of chunk packets currently being built asynchronously
     public final Queue<ChunkQueueEntry> chunkQueue = new ArrayDeque<>(CHUNK_QUEUE_SIZE);
@@ -58,10 +57,10 @@ public final class BvdPlayer {
     public boolean enabled = false;
     public boolean initiated = false;
 
-    public BvdPlayer(ServerPlayer player) {
+    public BvdPlayer(PlayerHook player) {
         this.player = player;
-        this.level = player.serverLevel();
-        this.chunkPos = player.chunkPosition();
+        this.level = player.getLevel();
+        this.chunkPos = player.getChunkPos();
         this.networkDimension = this.level.dimension();
     }
 
@@ -71,12 +70,12 @@ public final class BvdPlayer {
     }
 
     private boolean canStore(int chunkX, int chunkZ) {
-        return Math.abs(chunkX - this.chunkPos.x) <= this.storageRadius
-                && Math.abs(chunkZ - this.chunkPos.z) <= this.storageRadius;
+        return Math.abs(chunkX - this.chunkPos.getX()) <= this.storageRadius
+                && Math.abs(chunkZ - this.chunkPos.getZ()) <= this.storageRadius;
     }
 
     private boolean canBeActivated(int clientDistance) {
-        if (!this.initiated || !this.level.tjcConfig.bvdEnabled) {
+        if (!this.initiated || !this.level.getConfig().isEnabled()) {
             return false;
         }
         if (clientDistance < 1) {
@@ -89,7 +88,7 @@ public final class BvdPlayer {
     public void tryTriggerStart() {
         if (!this.initiated) {
             // reset chunk position as it may be invalid when this instance has been created
-            this.chunkPos = this.player.chunkPosition();
+            this.chunkPos = this.player.getChunkPos();
             this.initiated = true;
         }
     }
@@ -110,12 +109,12 @@ public final class BvdPlayer {
         state.set(chunkX, chunkZ, SERVER_LOADED);
     }
 
-    public boolean serverChunkRemove(ChunkPos chunkPos) {
-        int chunkX = chunkPos.x;
-        int chunkZ = chunkPos.z;
+    public boolean serverChunkRemove(McChunkPos chunkPos) {
+        int chunkX = chunkPos.getX();
+        int chunkZ = chunkPos.getZ();
         boolean insideCylinder = BvdUtilities.isWithinRange(
-                chunkX - this.chunkPos.x,
-                chunkZ - this.chunkPos.z,
+                chunkX - this.chunkPos.getX(),
+                chunkZ - this.chunkPos.getZ(),
                 this.distance);
         if (!insideCylinder) {
             // if we can still store this chunk pos, mark it as unloaded
@@ -134,12 +133,12 @@ public final class BvdPlayer {
     }
 
     public int getServerViewDistance() {
-        return PlatformHooks.get().getSendViewDistance(this.player);
+        return this.player.getSendViewDistance();
     }
 
     public int getClientViewDistance() {
-        int requestedDistance = this.player.requestedViewDistance();
-        int bvdDistance = this.level.tjcConfig.bvdServerViewDistance;
+        int requestedDistance = this.player.getRequestedViewDistance();
+        int bvdDistance = this.level.getBetterViewDistance();
         return Math.min(requestedDistance, bvdDistance);
     }
 
@@ -180,10 +179,10 @@ public final class BvdPlayer {
         }
 
         // refresh player client view distance
-        this.player.connection.send(new ClientboundSetChunkCacheRadiusPacket(newDistance));
+        this.player.sendViewDistancePacket(newDistance);
     }
 
-    public void move(ServerLevel newLevel, ChunkPos newPos) {
+    public void move(LevelHook newLevel, McChunkPos newPos) {
         if (newLevel != this.level) {
             this.level = newLevel;
             if (this.enabled) {
@@ -192,8 +191,8 @@ public final class BvdPlayer {
             return;
         }
 
-        ChunkPos previousPos = this.chunkPos;
-        if (newPos.longKey == previousPos.longKey) {
+        McChunkPos previousPos = this.chunkPos;
+        if (newPos.getKey() == previousPos.getKey()) {
             return; // nothing changed
         }
         this.chunkPos = newPos;
@@ -211,8 +210,8 @@ public final class BvdPlayer {
             }
 
             // unload chunks which are no longer in range
-            int centerX = this.chunkPos.x;
-            int centerZ = this.chunkPos.z;
+            int centerX = this.chunkPos.getX();
+            int centerZ = this.chunkPos.getZ();
             for (int i = 0, len = this.chunkStates.length; i < len; i++) {
                 ChunkState state = this.chunkStates[i];
                 if (!state.hasCoords()) {
@@ -231,9 +230,7 @@ public final class BvdPlayer {
                     state.set(0, 0, UNLOADED);
                     // only send unload packet if the chunk has actually been sent
                     if (lifecycle == BVD_LOADED) {
-                        long chunkKey = CoordinateUtils.getChunkKey(chunkX, chunkZ);
-                        ByteBuf unloadBuf = BvdUtilities.buildChunkUnload(chunkKey);
-                        this.player.connection.connection.channel.write(unloadBuf);
+                        this.player.sendChunkUnload(chunkX, chunkZ);
                     } else if (lifecycle == BVD_QUEUED) {
                         // remove from queue to prevent it from possibly appearing at the wrong place
                         this.purgeQueue(chunkX, chunkZ);
@@ -243,15 +240,15 @@ public final class BvdPlayer {
         }
     }
 
-    public @Nullable ChunkPos pollChunkPos() {
-        int centerX = this.chunkPos.x;
-        int centerZ = this.chunkPos.z;
+    public @Nullable McChunkPos pollChunkPos() {
+        int centerX = this.chunkPos.getX();
+        int centerZ = this.chunkPos.getZ();
         // carry current array index across ticks and only reset
         // it once the player actually changes the chunk position
         while (this.iterationIndex < this.chunksInDistance.length) {
             long chunkPos = this.chunksInDistance[this.iterationIndex++];
-            int chunkX = CoordinateUtils.getChunkX(chunkPos) + centerX;
-            int chunkZ = CoordinateUtils.getChunkZ(chunkPos) + centerZ;
+            int chunkX = McChunkPos.getChunkX(chunkPos) + centerX;
+            int chunkZ = McChunkPos.getChunkZ(chunkPos) + centerZ;
 
             int chunkIndex = calcIndex(chunkX, chunkZ, this.storageDiameter);
             ChunkState state = this.chunkStates[chunkIndex];
@@ -267,7 +264,7 @@ public final class BvdPlayer {
 
             // although the chunk isn't loaded yet, mark it as loaded already
             state.set(chunkX, chunkZ, BVD_QUEUED);
-            return new ChunkPos(chunkX, chunkZ);
+            return new McChunkPos(chunkX, chunkZ);
         }
         // reset iteration index to zero after a full chunk range pass without any valid chunks
         this.iterationIndex = 0;
@@ -276,7 +273,7 @@ public final class BvdPlayer {
 
     public void purgeQueue(int chunkX, int chunkZ) {
         this.chunkQueue.removeIf(entry ->
-                entry.chunkPos.x == chunkX && entry.chunkPos.z == chunkZ);
+                entry.chunkPos.getX() == chunkX && entry.chunkPos.getZ() == chunkZ);
     }
 
     public boolean checkQueueEntry(ChunkQueueEntry entry) {
@@ -285,8 +282,8 @@ public final class BvdPlayer {
         }
 
         // ensure the chunk state hasn't changed
-        ChunkPos chunkPos = entry.chunkPos;
-        int chunkIndex = calcIndex(chunkPos.x, chunkPos.z, this.storageDiameter);
+        McChunkPos chunkPos = entry.chunkPos;
+        int chunkIndex = calcIndex(chunkPos.getX(), chunkPos.getZ(), this.storageDiameter);
         ChunkState state = this.chunkStates[chunkIndex];
         if (state.lifecycle != BVD_QUEUED) {
             return true; // chunk no longer queued, remove entry
@@ -321,8 +318,8 @@ public final class BvdPlayer {
         // re-use the statically built empty chunk buffer
         ByteBuf finalChunkBuf = chunkBuf.isReadable()
                 ? chunkBuf.retainedSlice()
-                : BvdUtilities.getEmptyChunk(chunkPos, this.level);
-        this.player.connection.connection.channel.write(finalChunkBuf);
+                : this.level.getEmptyChunkBuf(chunkPos);
+        this.player.sendPacketBuf(finalChunkBuf);
         state.lifecycle = BVD_LOADED; // mark chunk as loaded by bvd
         return true;
     }
@@ -330,20 +327,18 @@ public final class BvdPlayer {
     // it doesn't matter if this method leaves behind lingering chunk coords,
     // as move() should clean up left behind coordinates which are now out-of-bounds
     public void unloadBvdChunks() {
-        int centerX = this.chunkPos.x;
-        int centerZ = this.chunkPos.z;
+        int centerX = this.chunkPos.getX();
+        int centerZ = this.chunkPos.getZ();
         for (long chunkKeyOff : this.chunksInDistance) {
-            int chunkX = CoordinateUtils.getChunkX(chunkKeyOff) + centerX;
-            int chunkZ = CoordinateUtils.getChunkZ(chunkKeyOff) + centerZ;
+            int chunkX = McChunkPos.getChunkX(chunkKeyOff) + centerX;
+            int chunkZ = McChunkPos.getChunkZ(chunkKeyOff) + centerZ;
             int chunkIndex = calcIndex(chunkX, chunkZ, this.storageDiameter);
 
             ChunkState state = this.chunkStates[chunkIndex];
             ChunkLifecycle lifecycle = state.lifecycle;
             if (lifecycle == BVD_LOADED || lifecycle == BVD_QUEUED) {
                 if (lifecycle == BVD_LOADED) {
-                    long chunkKey = CoordinateUtils.getChunkKey(chunkX, chunkZ);
-                    ByteBuf unloadBuf = BvdUtilities.buildChunkUnload(chunkKey);
-                    this.player.connection.connection.channel.write(unloadBuf);
+                    this.player.sendChunkUnload(chunkX, chunkZ);
                 }
                 state.lifecycle = UNLOADED; // mark as unloaded
             }
@@ -403,8 +398,7 @@ public final class BvdPlayer {
         this.enabled = false;
 
         // switch back to moonrise view distance
-        int serverDistance = this.getServerViewDistance();
-        this.player.connection.send(new ClientboundSetChunkCacheRadiusPacket(serverDistance));
+        this.player.sendViewDistancePacket(this.getServerViewDistance());
     }
 
     public enum ChunkLifecycle {
@@ -432,7 +426,7 @@ public final class BvdPlayer {
     }
 
     public record ChunkQueueEntry(
-            ChunkPos chunkPos,
+            McChunkPos chunkPos,
             CompletableFuture<@Nullable ByteBuf> future
     ) {}
 }
