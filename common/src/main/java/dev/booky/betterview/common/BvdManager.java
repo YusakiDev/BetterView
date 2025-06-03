@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 // bvd processing logic is done asynchronously on the netty threads
 // as this ensures dimension switches don't cause chunks to end up
@@ -49,8 +50,8 @@ public final class BvdManager {
     private final Path configPath;
     private BvConfig config;
 
-    public BvdManager(BetterViewHook hook, Path configPath) {
-        this.hook = hook;
+    public BvdManager(Function<BvdManager, BetterViewHook> hookConstructor, Path configPath) {
+        this.hook = hookConstructor.apply(this);
         this.configPath = configPath;
         this.config = this.loadConfig();
         this.saveConfig();
@@ -191,5 +192,21 @@ public final class BvdManager {
 
     public BvLevelConfig getConfig(Key worldName) {
         return this.config.getLevelConfig(worldName);
+    }
+
+    public LevelHook getLevel(Key worldName) {
+        return this.levels.computeIfAbsent(worldName, this.hook::constructLevel);
+    }
+
+    public void unregisterLevel(Key worldName) {
+        this.levels.remove(worldName);
+    }
+
+    public PlayerHook getPlayer(UUID playerId) {
+        return this.players.computeIfAbsent(playerId, this.hook::constructPlayer);
+    }
+
+    public void unregisterPlayer(UUID playerId) {
+        this.players.remove(playerId);
     }
 }

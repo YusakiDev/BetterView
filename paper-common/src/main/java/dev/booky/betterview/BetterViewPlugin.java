@@ -2,6 +2,8 @@ package dev.booky.betterview;
 // Created by booky10 in BetterView (15:40 03.06.2025)
 
 import dev.booky.betterview.common.BvdManager;
+import dev.booky.betterview.listener.LevelListener;
+import dev.booky.betterview.listener.PlayerListener;
 import dev.booky.betterview.listener.TickListener;
 import dev.booky.betterview.platform.PaperBetterView;
 import org.bukkit.Bukkit;
@@ -17,11 +19,13 @@ public class BetterViewPlugin extends JavaPlugin {
 
     public BetterViewPlugin() {
         Path configPath = this.getDataPath().resolve("config.yml");
-        this.manager = new BvdManager(new PaperBetterView(), configPath);
+        this.manager = new BvdManager(PaperBetterView::new, configPath);
     }
 
     @Override
     public void onEnable() {
+        Bukkit.getPluginManager().registerEvents(new LevelListener(this.manager), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(this.manager), this);
         Bukkit.getPluginManager().registerEvents(new TickListener(this.manager), this);
 
         // run task after server has finished starting
