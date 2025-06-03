@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.network.protocol.game.ClientboundStartConfigurationPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
@@ -41,7 +42,8 @@ public class PacketHandler extends ChannelOutboundHandlerAdapter {
                 || input instanceof ClientboundForgetLevelChunkPacket
                 || input instanceof ClientboundLoginPacket
                 || input instanceof ClientboundStartConfigurationPacket
-                || input instanceof ClientboundRespawnPacket) {
+                || input instanceof ClientboundRespawnPacket
+                || input instanceof ClientboundSetChunkCacheRadiusPacket) {
             if (this.player != null && this.player.enabled) {
                 switch (input) {
                     case ClientboundLevelChunkWithLightPacket packet ->
@@ -56,6 +58,9 @@ public class PacketHandler extends ChannelOutboundHandlerAdapter {
                     case ClientboundRespawnPacket packet -> {
                         ResourceKey<Level> dimension = packet.commonPlayerSpawnInfo().dimension();
                         this.player.handleDimensionReset(dimension);
+                    }
+                    case ClientboundSetChunkCacheRadiusPacket __ -> {
+                        return true; // always cancel if enabled
                     }
                     default -> {
                         // NO-OP
