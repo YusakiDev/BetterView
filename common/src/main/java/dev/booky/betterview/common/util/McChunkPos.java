@@ -31,7 +31,7 @@ public final class McChunkPos {
     }
 
     public static long getChunkKey(int posX, int posZ) {
-        return ((long) posZ << Integer.SIZE) | posX;
+        return ((long) posZ << Integer.SIZE) | (posX & 0xFFFFFFFFL);
     }
 
     public static int getChunkX(long key) {
