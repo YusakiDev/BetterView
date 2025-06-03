@@ -5,6 +5,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import dev.booky.betterview.common.BvdCacheEntry;
 import dev.booky.betterview.common.hooks.LevelHook;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
@@ -41,5 +43,21 @@ public final class BetterViewUtil {
         long distXZSqrt = distX * distX + distZ * distZ;
         int viewDistanceSqrt = viewDistance * viewDistance;
         return distXZSqrt < viewDistanceSqrt; // outside cylindrical distance
+    }
+
+    public static ByteBuf encodeChunkPos(long chunkKey) {
+        // same as vanilla encoding a chunk position directly
+        return Unpooled.wrappedBuffer(new byte[]{
+                (byte) (chunkKey >> 56), (byte) (chunkKey >> 48), (byte) (chunkKey >> 40), (byte) (chunkKey >> 32),
+                (byte) (chunkKey >> 24), (byte) (chunkKey >> 16), (byte) (chunkKey >> 8), (byte) chunkKey,
+        });
+    }
+
+    public static ByteBuf encodeChunkPos(int chunkX, int chunkZ) {
+        // same as vanilla encoding the chunk x/z positions as 4-byte ints
+        return Unpooled.wrappedBuffer(new byte[]{
+                (byte) (chunkX >> 24), (byte) (chunkX >> 16), (byte) (chunkX >> 8), (byte) chunkX,
+                (byte) (chunkZ >> 24), (byte) (chunkZ >> 16), (byte) (chunkZ >> 8), (byte) chunkZ,
+        });
     }
 }

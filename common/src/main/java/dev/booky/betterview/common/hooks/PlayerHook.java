@@ -13,13 +13,10 @@ public interface PlayerHook {
 
     McChunkPos getChunkPos();
 
-    // return PlatformHooks.get().getSendViewDistance(this.player);
     int getSendViewDistance();
 
-    // int requestedDistance = this.player.requestedViewDistance();
     int getRequestedViewDistance();
 
-    // this.player.connection.send(new ClientboundSetChunkCacheRadiusPacket(newDistance));
     void sendViewDistancePacket(int distance);
 
     // long chunkKey = CoordinateUtils.getChunkKey(chunkX, chunkZ);
