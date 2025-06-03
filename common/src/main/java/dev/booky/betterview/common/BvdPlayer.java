@@ -140,7 +140,7 @@ public final class BvdPlayer {
 
     public int getClientViewDistance() {
         int requestedDistance = this.player.getRequestedViewDistance();
-        int bvdDistance = this.level.getBetterViewDistance();
+        int bvdDistance = this.level.getConfig().getViewDistance();
         return Math.min(requestedDistance, bvdDistance);
     }
 

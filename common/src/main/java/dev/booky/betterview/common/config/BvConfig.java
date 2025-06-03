@@ -28,7 +28,7 @@ public class BvConfig {
         return this.global;
     }
 
-    public BvLevelConfig getLevelConfig(Key worldKey) {
-        return this.dimensions.computeIfAbsent(worldKey, __ -> new BvLevelConfig());
+    public BvLevelConfig getLevelConfig(Key worldName) {
+        return this.dimensions.computeIfAbsent(worldName, __ -> new BvLevelConfig());
     }
 }

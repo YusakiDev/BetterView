@@ -6,7 +6,6 @@ import dev.booky.betterview.common.BvdPlayer;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.hooks.PlayerHook;
 import dev.booky.betterview.common.util.BetterViewUtil;
-import dev.booky.betterview.common.util.CachedLookup;
 import dev.booky.betterview.common.util.McChunkPos;
 import dev.booky.betterview.nms.BypassedPacket;
 import dev.booky.betterview.nms.PaperNmsInterface;
@@ -14,7 +13,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NullMarked;
 

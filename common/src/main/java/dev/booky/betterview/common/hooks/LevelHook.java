@@ -21,12 +21,8 @@ public interface LevelHook {
 
     CompletableFuture<@Nullable ChunkTagResult> readChunk(McChunkPos chunkPos);
 
-    // PlatformHooks.get().scheduleChunkLoad(level, pos.x, pos.z, true, ChunkStatus.LIGHT, true, Priority.LOW,
-    //         generatedChunk -> future.complete(BvdChunk.chunkToBytesOrEmpty(level, generatedChunk)));
     void loadChunk(int chunkX, int chunkZ, Consumer<ByteBuf> onComplete);
 
-    // if (BvdManager.GENERATED_CHUNKS.getAndIncrement() > TJCServerConfig.bvdMaxGeneratedChunksTick) {
-    // } else if (level.bvdGeneratedChunks.getAndIncrement() > level.tjcConfig.bvdMaxGeneratedChunksTick) {
     boolean checkChunkGeneration();
 
     void resetChunkGeneration();
@@ -35,10 +31,7 @@ public interface LevelHook {
 
     boolean isVoidWorld();
 
-    // ResourceKey<Level>
     Object dimension();
-
-    int getBetterViewDistance();
 
     BvLevelConfig getConfig();
 

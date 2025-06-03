@@ -12,6 +12,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 @NullMarked
 public interface PaperNmsInterface {
@@ -35,4 +36,12 @@ public interface PaperNmsInterface {
     @Nullable ByteBuf getLoadedChunkBuf(World world, McChunkPos chunkPos);
 
     CompletableFuture<@Nullable ChunkTagResult> readChunkTag(World world, McChunkPos chunkPos);
+
+    void loadChunk(World world, int chunkX, int chunkZ, Consumer<ByteBuf> onComplete);
+
+    boolean checkVoidWorld(World world);
+
+    Object getDimensionId(World world);
+
+    ByteBuf buildEmptyChunkData(World world);
 }

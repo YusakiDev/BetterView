@@ -3,6 +3,7 @@ package dev.booky.betterview.common;
 
 import dev.booky.betterview.common.BvdPlayer.ChunkQueueEntry;
 import dev.booky.betterview.common.config.BvConfig;
+import dev.booky.betterview.common.config.BvLevelConfig;
 import dev.booky.betterview.common.config.loading.ConfigurateLoader;
 import dev.booky.betterview.common.hooks.BetterViewHook;
 import dev.booky.betterview.common.hooks.LevelHook;
@@ -186,5 +187,9 @@ public final class BvdManager {
 
     public boolean checkChunkGeneration() {
         return this.generatedChunks.getAndIncrement() <= this.config.getGlobalConfig().getChunkGenerationLimit();
+    }
+
+    public BvLevelConfig getConfig(Key worldName) {
+        return this.config.getLevelConfig(worldName);
     }
 }

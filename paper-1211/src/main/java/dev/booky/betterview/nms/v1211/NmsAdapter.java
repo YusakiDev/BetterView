@@ -1,6 +1,8 @@
 package dev.booky.betterview.nms.v1211;
 // Created by booky10 in BetterView (16:37 03.06.2025)
 
+import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor;
+import ca.spottedleaf.moonrise.common.util.ChunkSystem;
 import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder;
 import dev.booky.betterview.common.util.ChunkTagResult;
 import dev.booky.betterview.common.util.McChunkPos;
@@ -9,13 +11,21 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -24,6 +34,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 @NullMarked
 public class NmsAdapter implements PaperNmsInterface {
@@ -102,5 +113,46 @@ public class NmsAdapter implements PaperNmsInterface {
             ByteBuf chunkBuf = ChunkTagTransformer.transformToBytesOrEmpty(level, tag.get(), nmsPos);
             return new ChunkTagResult(chunkBuf);
         });
+    }
+
+    @Override
+    public void loadChunk(World world, int chunkX, int chunkZ, Consumer<ByteBuf> onComplete) {
+        ServerLevel level = ((CraftWorld) world).getHandle();
+        ChunkSystem.scheduleChunkLoad(level, chunkX, chunkZ, true, ChunkStatus.LIGHT, true, PrioritisedExecutor.Priority.LOW,
+                chunk -> onComplete.accept(ChunkWriter.writeFullOrEmpty(chunk)));
+    }
+
+    @Override
+    public boolean checkVoidWorld(World world) {
+        ServerLevel level = ((CraftWorld) world).getHandle();
+        if (level.chunkSource.getGenerator() instanceof FlatLevelSource flat) {
+            return flat.settings().getLayers().stream()
+                    .noneMatch(state -> state != null && !state.isAir());
+        }
+        return false;
+    }
+
+    @Override
+    public Object getDimensionId(World world) {
+        return ((CraftWorld) world).getHandle().dimension();
+    }
+
+    @Override
+    public ByteBuf buildEmptyChunkData(World world) {
+        ServerLevel level = ((CraftWorld) world).getHandle();
+        Registry<Biome> biomeRegistry = level.registryAccess().registryOrThrow(Registries.BIOME);
+        Holder.Reference<Biome> biome = biomeRegistry.getHolderOrThrow(Biomes.THE_VOID);
+        EmptyLevelChunk chunk = new EmptyLevelChunk(level, ChunkPos.ZERO, biome);
+
+        ByteBuf buf = Unpooled.buffer();
+        try {
+            CompoundTag heightmapTags = ChunkWriter.extractHeightmapTags(chunk);
+            byte[][] blockLight = LightWriter.convertStarlightToBytes(chunk.starlight$getBlockNibbles(), false);
+            byte[][] skyLight = LightWriter.convertStarlightToBytes(chunk.starlight$getSkyNibbles(), true);
+            ChunkWriter.writeFullBody(buf, heightmapTags, chunk.getSections(), blockLight, skyLight);
+            return buf.retain();
+        } finally {
+            buf.release();
+        }
     }
 }

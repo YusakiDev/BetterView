@@ -7,7 +7,6 @@ import com.destroystokyo.paper.util.SneakyThrow;
 import com.mojang.serialization.Codec;
 import dev.booky.betterview.common.util.ReflectionUtil;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -16,8 +15,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.VarInt;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -72,7 +69,7 @@ public final class ChunkTagTransformer {
     }
 
     private static boolean extractChunkData(
-            ServerLevel level, CompoundTag tag, ChunkPos pos,
+            ServerLevel level, CompoundTag chunkTag, ChunkPos pos,
             LevelChunkSection[] sections,
             byte[][] blockLight,
             byte @Nullable [][] skyLight
@@ -80,7 +77,7 @@ public final class ChunkTagTransformer {
         Registry<Biome> biomeRegistry = level.registryAccess().registryOrThrow(Registries.BIOME);
         Codec<PalettedContainer<Holder<Biome>>> biomeCodec = makeBiomeCodecRW(biomeRegistry);
 
-        ListTag sectionTags = tag.getList(ChunkSerializer.SECTIONS_TAG, Tag.TAG_COMPOUND);
+        ListTag sectionTags = chunkTag.getList(ChunkSerializer.SECTIONS_TAG, Tag.TAG_COMPOUND);
         int minLightSection = WorldUtil.getMinLightSection(level);
 
         boolean onlyAir = true;
@@ -153,8 +150,8 @@ public final class ChunkTagTransformer {
         return onlyAir;
     }
 
-    private static CompoundTag filterHeightmaps(CompoundTag tag) {
-        CompoundTag heightmaps = tag.getCompound(ChunkSerializer.HEIGHTMAPS_TAG);
+    private static CompoundTag filterHeightmaps(CompoundTag chunkTag) {
+        CompoundTag heightmaps = chunkTag.getCompound(ChunkSerializer.HEIGHTMAPS_TAG);
         if (heightmaps.isEmpty()) {
             return heightmaps;
         }
@@ -169,51 +166,21 @@ public final class ChunkTagTransformer {
         return filteredHeightmaps;
     }
 
-    public static ByteBuf transformToBytesOrEmpty(ServerLevel level, CompoundTag tag, ChunkPos pos) {
+    public static ByteBuf transformToBytesOrEmpty(ServerLevel level, CompoundTag chunkTag, ChunkPos pos) {
         // extract relevant chunk data
         LevelChunkSection[] sections = new LevelChunkSection[level.getSectionsCount()];
         byte[][] blockLight = new byte[WorldUtil.getTotalLightSections(level)][];
         byte[][] skyLight = level.dimensionType().hasSkyLight() ? new byte[blockLight.length][] : null;
-
-        boolean onlyAir = extractChunkData(level, tag, pos, sections, blockLight, skyLight);
+        boolean onlyAir = extractChunkData(level, chunkTag, pos, sections, blockLight, skyLight);
         if (onlyAir) {
             // empty, skip writing useless packet
             return Unpooled.EMPTY_BUFFER;
         }
-        // calculate serialized size of chunk data
-        int serializedSize = 0;
-        for (int i = 0, len = sections.length; i < len; i++) {
-            serializedSize += sections[i].getSerializedSize();
-        }
-        // allocate pooled buffer
-        ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
-        try {
-            // packet id
-            buf.writeByte(NmsAdapter.LEVEL_CHUNK_WITH_LIGHT_PACKET_ID);
-            // chunk position
-            buf.writeInt(pos.x);
-            buf.writeInt(pos.z);
-            // write heightmaps nbt tag
-            FriendlyByteBuf.writeNbt(buf, filterHeightmaps(tag));
-            // directly write chunk data, don't create useless sub-buffer
-            VarInt.write(buf, serializedSize);
-            int expectedWriterIndex = buf.writerIndex() + serializedSize;
-            FriendlyByteBuf friendlyBuf = new FriendlyByteBuf(buf);
-            for (int i = 0, len = sections.length; i < len; i++) {
-                sections[i].write(friendlyBuf, null, 0);
-            }
-            // ensure the vanilla client can read this data
-            if (buf.writerIndex() != expectedWriterIndex) {
-                throw new IllegalStateException("Expected writer index to be at "
-                        + expectedWriterIndex + ", got " + buf.writerIndex());
-            }
-            // skip writing block entity list
-            VarInt.write(buf, 0);
-            // write light data
-            LightWriter.writeLightData(buf, blockLight, skyLight);
-            return buf.retain();
-        } finally {
-            buf.release();
-        }
+        CompoundTag heightmapsTag = filterHeightmaps(chunkTag);
+        // delegate to chunk writing method
+        return ChunkWriter.writeFull(
+                pos.x, pos.z, heightmapsTag,
+                sections, blockLight, skyLight
+        );
     }
 }
