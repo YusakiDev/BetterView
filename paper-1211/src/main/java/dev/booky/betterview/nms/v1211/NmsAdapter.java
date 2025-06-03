@@ -45,10 +45,10 @@ import java.util.function.Consumer;
 public class NmsAdapter implements PaperNmsInterface {
 
     // magic packet id values
-    static final byte FORGET_LEVEL_CHUNK_PACKET_ID = 0x22;
+    static final byte FORGET_LEVEL_CHUNK_PACKET_ID = 0x21;
     static final ByteBuf FORGET_LEVEL_CHUNK_PACKET_ID_BUF =
             Unpooled.wrappedBuffer(new byte[]{FORGET_LEVEL_CHUNK_PACKET_ID});
-    static final byte LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = 0x28;
+    static final byte LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = 0x27;
     static final ByteBuf LEVEL_CHUNK_WITH_LIGHT_PACKET_ID_BUF =
             Unpooled.wrappedBuffer(new byte[]{LEVEL_CHUNK_WITH_LIGHT_PACKET_ID});
 
