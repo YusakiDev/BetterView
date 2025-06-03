@@ -1,4 +1,4 @@
-package dev.booky.betterview.common.config.serializer;
+package dev.booky.betterview.common.config.loading;
 // Created by booky10 in BetterView (15:54 03.06.2025)
 
 import net.kyori.adventure.key.Key;

@@ -1,8 +1,8 @@
 package dev.booky.betterview.common.config;
 // Created by booky10 in BetterView (15:47 03.06.2025)
 
-import dev.booky.betterview.common.config.serializer.DurationSerializer;
-import dev.booky.betterview.common.config.serializer.KeySerializer;
+import dev.booky.betterview.common.config.loading.DurationSerializer;
+import dev.booky.betterview.common.config.loading.KeySerializer;
 import net.kyori.adventure.key.Key;
 import org.jspecify.annotations.NullMarked;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
