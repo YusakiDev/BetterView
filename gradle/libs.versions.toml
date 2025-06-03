@@ -9,6 +9,7 @@ pluginyml = "0.6.0"
 slf4j = "2.0.17"
 jspecify = "1.0.0"
 checker-qual = "3.49.3"
+netty = "4.1.121.Final"
 
 # paper
 paper-base = "1.21.1-R0.1-SNAPSHOT"
@@ -31,6 +32,7 @@ pluginyml-bukkit = { id = "net.minecrell.plugin-yml.bukkit", version.ref = "plug
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-qual" }
+netty-buffer = { module = "io.netty:netty-buffer", version.ref = "netty" }
 
 # paper
 paper-api-base = { module = "io.papermc.paper:paper-api", version.ref = "paper-base" }
