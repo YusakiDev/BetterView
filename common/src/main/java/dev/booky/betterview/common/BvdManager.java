@@ -2,21 +2,29 @@ package dev.booky.betterview.common;
 // Created by booky10 in BetterView (15:19 03.06.2025)
 
 import dev.booky.betterview.common.BvdPlayer.ChunkQueueEntry;
+import dev.booky.betterview.common.config.BvConfig;
+import dev.booky.betterview.common.config.loading.ConfigurateLoader;
 import dev.booky.betterview.common.hooks.BetterViewHook;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.hooks.PlayerHook;
 import dev.booky.betterview.common.util.McChunkPos;
+import io.leangen.geantyref.TypeToken;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.SystemPropertyUtil;
+import net.kyori.adventure.key.Key;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,11 +39,30 @@ public final class BvdManager {
     static final int TICK_LENGTH_DIVISOR = 2;
     static final int CHUNK_QUEUE_SIZE = 16;
 
-    private final BetterViewHook hook;
     private final AtomicInteger generatedChunks = new AtomicInteger(0);
+    private final BetterViewHook hook;
 
-    public BvdManager(BetterViewHook hook) {
+    private final Map<Key, LevelHook> levels = new HashMap<>();
+    private final Map<UUID, PlayerHook> players = new HashMap<>();
+
+    private final Path configPath;
+    private BvConfig config;
+
+    public BvdManager(BetterViewHook hook, Path configPath) {
         this.hook = hook;
+        this.configPath = configPath;
+        this.config = this.loadConfig();
+        this.saveConfig();
+    }
+
+    private BvConfig loadConfig() {
+        return ConfigurateLoader.loadYaml(BvConfig.SERIALIZERS, this.configPath,
+                new TypeToken<BvConfig>() {}, BvConfig::new);
+    }
+
+    private void saveConfig() {
+        ConfigurateLoader.saveYaml(BvConfig.SERIALIZERS, this.configPath,
+                new TypeToken<BvConfig>() {}, this.config);
     }
 
     /*
@@ -69,22 +96,30 @@ public final class BvdManager {
     }
      */
 
+    public void onPostLoad() {
+        // reload config and populate dimensions
+        this.config = this.loadConfig();
+        for (LevelHook level : this.levels.values()) {
+            this.config.getLevelConfig(level.getName());
+        }
+        this.saveConfig();
+    }
+
     // called on main thread
     public void runTick() {
         BetterViewHook hook = this.hook;
-        if (!hook.getConfig().isEnabled()) {
+        if (!this.config.getGlobalConfig().isEnabled()) {
             return; // disabled globally
         }
 
-        List<? extends PlayerHook> players = new ArrayList<>(hook.getPlayers());
+        List<? extends PlayerHook> players = new ArrayList<>(this.players.values());
         if (players.isEmpty()) {
             return; // no players online
         }
-        List<? extends LevelHook> levels = hook.getLevels();
 
         // reset chunk generation counters
         this.generatedChunks.set(0);
-        for (LevelHook level : levels) {
+        for (LevelHook level : this.levels.values()) {
             level.resetChunkGeneration();
         }
 
@@ -124,7 +159,7 @@ public final class BvdManager {
         }
 
         // start processing chunks (process at least once)
-        int chunksPerTick = this.hook.getConfig().getChunkSendLimit();
+        int chunksPerTick = this.config.getGlobalConfig().getChunkSendLimit();
         do {
             // check if any chunks are built and ready for sending
             bvd.chunkQueue.removeIf(bvd::checkQueueEntry);
@@ -149,7 +184,7 @@ public final class BvdManager {
         } while (deadline > System.nanoTime());
     }
 
-    public AtomicInteger getGeneratedChunks() {
-        return this.generatedChunks;
+    public boolean checkChunkGeneration() {
+        return this.generatedChunks.getAndIncrement() <= this.config.getGlobalConfig().getChunkGenerationLimit();
     }
 }

@@ -6,6 +6,7 @@ import dev.booky.betterview.common.BvdCacheEntry;
 import dev.booky.betterview.common.config.BvLevelConfig;
 import dev.booky.betterview.common.util.McChunkPos;
 import io.netty.buffer.ByteBuf;
+import net.kyori.adventure.key.Key;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -41,4 +42,6 @@ public interface LevelHook {
     BvLevelConfig getConfig();
 
     LoadingCache<McChunkPos, BvdCacheEntry> getBvdCache();
+
+    Key getName();
 }

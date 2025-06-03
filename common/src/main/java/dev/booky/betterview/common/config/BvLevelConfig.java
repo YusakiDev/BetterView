@@ -20,9 +20,6 @@ public class BvLevelConfig {
     @Setting("The cache duration for all extended chunks, after which they will be re-build")
     private Duration cacheDuration = Duration.ofMinutes(5L);
 
-    private BvLevelConfig() {
-    }
-
     public boolean isEnabled() {
         return this.enabled;
     }

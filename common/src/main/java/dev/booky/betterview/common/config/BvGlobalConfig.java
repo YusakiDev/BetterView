@@ -16,9 +16,6 @@ public class BvGlobalConfig {
     @Setting("The maximum amount of chunks sent to a player in a tick")
     private int chunkSendLimit = 3;
 
-    private BvGlobalConfig() {
-    }
-
     public boolean isEnabled() {
         return this.enabled;
     }

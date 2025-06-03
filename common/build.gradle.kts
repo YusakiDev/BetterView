@@ -5,6 +5,7 @@ dependencies {
     compileOnlyApi(libs.netty.buffer)
     compileOnlyApi(libs.netty.transport)
     compileOnlyApi(libs.fastutil)
+    compileOnlyApi(libs.adventure.api)
     api(libs.caffeine)
     api(libs.configurate.yaml)
 }
