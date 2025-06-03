@@ -4,6 +4,7 @@ package dev.booky.betterview.common.hooks;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import dev.booky.betterview.common.BvdCacheEntry;
 import dev.booky.betterview.common.config.BvLevelConfig;
+import dev.booky.betterview.common.util.ChunkTagResult;
 import dev.booky.betterview.common.util.McChunkPos;
 import io.netty.buffer.ByteBuf;
 import net.kyori.adventure.key.Key;
@@ -16,13 +17,13 @@ import java.util.function.Consumer;
 @NullMarked
 public interface LevelHook {
 
-    @Nullable ChunkHook getCachedChunk(long chunkKey);
+    @Nullable ByteBuf getCachedChunkBuf(McChunkPos chunkPos);
 
-    CompletableFuture<@Nullable ChunkTagHook> readChunk(McChunkPos chunkPos);
+    CompletableFuture<@Nullable ChunkTagResult> readChunk(McChunkPos chunkPos);
 
     // PlatformHooks.get().scheduleChunkLoad(level, pos.x, pos.z, true, ChunkStatus.LIGHT, true, Priority.LOW,
     //         generatedChunk -> future.complete(BvdChunk.chunkToBytesOrEmpty(level, generatedChunk)));
-    void loadChunk(int chunkX, int chunkZ, Consumer<ChunkHook> onComplete);
+    void loadChunk(int chunkX, int chunkZ, Consumer<ByteBuf> onComplete);
 
     // if (BvdManager.GENERATED_CHUNKS.getAndIncrement() > TJCServerConfig.bvdMaxGeneratedChunksTick) {
     // } else if (level.bvdGeneratedChunks.getAndIncrement() > level.tjcConfig.bvdMaxGeneratedChunksTick) {

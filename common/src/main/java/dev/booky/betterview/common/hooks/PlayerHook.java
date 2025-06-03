@@ -19,12 +19,8 @@ public interface PlayerHook {
 
     void sendViewDistancePacket(int distance);
 
-    // long chunkKey = CoordinateUtils.getChunkKey(chunkX, chunkZ);
-    // ByteBuf unloadBuf = BvdUtilities.buildChunkUnload(chunkKey);
-    // this.player.connection.connection.channel.write(unloadBuf);
     void sendChunkUnload(int chunkX, int chunkZ);
 
-    // player.connection.connection.channel
     Channel getNettyChannel();
 
     BvdPlayer getBvdPlayer();

@@ -1,7 +1,6 @@
 package dev.booky.betterview.common;
 // Created by booky10 in TJCServer (21:07 12.05.2025)
 
-import dev.booky.betterview.common.hooks.ChunkHook;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.util.McChunkPos;
 import io.netty.buffer.ByteBuf;
@@ -33,17 +32,17 @@ public final class BvdCacheEntry {
 
         // load chunk from level cache; I'm not sure whether this is thread-safe or not,
         // but this hasn't caused any issues yet - so I'll just assume it's thread-safe :)
-        ChunkHook chunk = level.getCachedChunk(pos.getKey());
-        if (chunk != null) {
-            return CompletableFuture.completedFuture(chunk.toBytesOrEmpty());
+        ByteBuf chunkBuf = level.getCachedChunkBuf(pos);
+        if (chunkBuf != null) {
+            return CompletableFuture.completedFuture(chunkBuf);
         }
 
         // read chunk directly from storage; this is passed to an IO thread anyway, so it
         // doesn't matter that this is called off-thread I think
         return level.readChunk(pos).thenComposeAsync(chunkTag -> {
             // if the is fully lit (chunk upgrading is done while reading), create chunk data directly
-            if (chunkTag != null && chunkTag.isChunkLit()) {
-                return CompletableFuture.completedFuture(chunkTag.toBytesOrEmpty(level, pos));
+            if (chunkTag != null && chunkTag.buffer() != null) {
+                return CompletableFuture.completedFuture(chunkTag.buffer());
             } else if (chunkTag == null && level.isVoidWorld()) {
                 // skip useless chunk generation if this is a void world
                 return CompletableFuture.completedFuture(Unpooled.EMPTY_BUFFER);
@@ -54,8 +53,7 @@ public final class BvdCacheEntry {
 
             // call moonrise chunk system to generate chunk to LIGHT stage
             CompletableFuture<ByteBuf> future = new CompletableFuture<>();
-            level.loadChunk(pos.getX(), pos.getZ(), generatedChunk ->
-                    future.complete(generatedChunk.toBytesOrEmpty()));
+            level.loadChunk(pos.getX(), pos.getZ(), future::complete);
             return future;
         });
     }

@@ -1,0 +1,94 @@
+package dev.booky.betterview.nms.v1211;
+// Created by booky10 in BetterView (20:38 03.06.2025)
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.LongArrayTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.VarInt;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.EmptyLevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.levelgen.Heightmap;
+import org.jspecify.annotations.NullMarked;
+
+import java.util.Arrays;
+
+@NullMarked
+public final class ChunkWriter {
+
+     static final Heightmap.Types[] SENDABLE_HEIGHTMAP_TYPES = Arrays.stream(Heightmap.Types.values())
+            .filter(Heightmap.Types::sendToClient).toArray(Heightmap.Types[]::new);
+
+    private ChunkWriter() {
+    }
+
+    private static boolean isEmpty(ChunkAccess chunk) {
+        if (chunk instanceof EmptyLevelChunk) {
+            return true;
+        }
+        LevelChunkSection[] sections = chunk.getSections();
+        for (int i = 0, len = sections.length; i < len; i++) {
+            LevelChunkSection section = sections[i];
+            if (section != null && !section.hasOnlyAir()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static ByteBuf writeFullOrEmpty(ChunkAccess chunk) {
+        if (isEmpty(chunk)) {
+            return Unpooled.EMPTY_BUFFER;
+        }
+        // build heightmaps tag
+        CompoundTag heightmapsTag = new CompoundTag();
+        for (int i = 0, len = SENDABLE_HEIGHTMAP_TYPES.length; i < len; i++) {
+            Heightmap.Types type = SENDABLE_HEIGHTMAP_TYPES[i];
+            if (chunk.hasPrimedHeightmap(type)) {
+                long[] heightmapData = chunk.getOrCreateHeightmapUnprimed(type).getRawData();
+                heightmapsTag.put(type.getSerializationKey(), new LongArrayTag(heightmapData));
+            }
+        }
+        // calculate serialized size of chunk data
+        LevelChunkSection[] sections = chunk.getSections();
+        int serializedSize = 0;
+        for (int i = 0, len = sections.length; i < len; i++) {
+            serializedSize += sections[i].getSerializedSize();
+        }
+        // allocate pooled buffer
+        ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
+        try {
+            // packet id
+            buf.writeByte(NmsAdapter.LEVEL_CHUNK_WITH_LIGHT_PACKET_ID);
+            // chunk position
+            buf.writeInt(chunk.locX);
+            buf.writeInt(chunk.locZ);
+            // write heightmaps nbt tag
+            FriendlyByteBuf.writeNbt(buf, heightmapsTag);
+            // directly write chunk data, don't create useless sub-buffer
+            VarInt.write(buf, serializedSize);
+            int expectedWriterIndex = buf.writerIndex() + serializedSize;
+            FriendlyByteBuf friendlyBuf = new FriendlyByteBuf(buf);
+            for (int i = 0, len = sections.length; i < len; i++) {
+                sections[i].write(friendlyBuf, null, 0);
+            }
+            // ensure the vanilla client can read this data
+            if (buf.writerIndex() != expectedWriterIndex) {
+                throw new IllegalStateException("Expected writer index to be at "
+                        + expectedWriterIndex + ", got " + buf.writerIndex());
+            }
+            // skip writing block entity list
+            VarInt.write(buf, 0);
+            // write light data
+            LightWriter.writeLightData(buf,
+                    LightWriter.convertStarlightToBytes(chunk.starlight$getBlockNibbles(), false),
+                    LightWriter.convertStarlightToBytes(chunk.starlight$getSkyNibbles(), true));
+            return buf.retain();
+        } finally {
+            buf.release();
+        }
+    }
+}
