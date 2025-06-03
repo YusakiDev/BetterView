@@ -52,7 +52,7 @@ public class PaperLevel implements LevelHook {
 
     @Override
     public void loadChunk(int chunkX, int chunkZ, Consumer<ByteBuf> onComplete) {
-        PaperNmsInterface.SERVICE.loadChunk(this.world, chunkX, chunkX, onComplete);
+        PaperNmsInterface.SERVICE.loadChunk(this.world, chunkX, chunkZ, onComplete);
     }
 
     @Override
