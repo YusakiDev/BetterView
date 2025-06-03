@@ -1,11 +1,13 @@
 package dev.booky.betterview.nms;
 // Created by booky10 in BetterView (16:21 03.06.2025)
 
+import dev.booky.betterview.common.BvdPlayer;
 import dev.booky.betterview.common.util.ChunkTagResult;
 import dev.booky.betterview.common.util.McChunkPos;
 import dev.booky.betterview.common.util.ServicesUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NullMarked;
@@ -18,6 +20,8 @@ import java.util.function.Consumer;
 public interface PaperNmsInterface {
 
     PaperNmsInterface SERVICE = ServicesUtil.loadService(PaperNmsInterface.class);
+
+    String BETTERVIEW_HANDLER = "betterview_handler";
 
     long getNanosPerServerTick();
 
@@ -44,4 +48,10 @@ public interface PaperNmsInterface {
     Object getDimensionId(World world);
 
     ByteBuf buildEmptyChunkData(World world);
+
+    void injectPacketHandler(NamespacedKey listenerKey);
+
+    void uninjectPacketHandler(NamespacedKey listenerKey);
+
+    void saveNetworkPlayer(Channel channel, BvdPlayer bvdPlayer);
 }

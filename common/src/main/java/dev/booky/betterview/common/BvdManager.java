@@ -67,37 +67,6 @@ public final class BvdManager {
                 new TypeToken<BvConfig>() {}, this.config);
     }
 
-    /*
-
-    public static boolean checkPacket(CraftPacketContext ctx, Packet<?> input) {
-        if (input instanceof ClientboundLevelChunkWithLightPacket
-                || input instanceof ClientboundForgetLevelChunkPacket
-                || input instanceof ClientboundLoginPacket
-                || input instanceof ClientboundStartConfigurationPacket
-                || input instanceof ClientboundRespawnPacket) {
-            CraftPlayer player = (CraftPlayer) ctx.getPlayer();
-            BvdPlayer bvd = player != null ? player.getHandle().tjc$bvd : null;
-            if (bvd != null && bvd.enabled) {
-                switch (input) {
-                    case ClientboundLevelChunkWithLightPacket packet ->
-                            bvd.serverChunkAdd(packet.getX(), packet.getZ());
-                    case ClientboundForgetLevelChunkPacket packet -> {
-                        // if the chunk is still in range, cancel the unload packet
-                        return bvd.serverChunkRemove(packet.pos());
-                    }
-                    case ClientboundLoginPacket __ -> bvd.handleDimensionReset(null);
-                    case ClientboundStartConfigurationPacket __ -> bvd.handleDimensionReset(null);
-                    case ClientboundRespawnPacket packet -> bvd.handleDimensionReset(packet.commonPlayerSpawnInfo().dimension());
-                    default -> {
-                        // NO-OP
-                    }
-                }
-            }
-        }
-        return false; // don't cancel packet
-    }
-     */
-
     public void onPostLoad() {
         // reload config and populate dimensions
         this.config = this.loadConfig();

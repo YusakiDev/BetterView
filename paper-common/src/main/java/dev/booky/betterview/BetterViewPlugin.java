@@ -5,9 +5,12 @@ import dev.booky.betterview.common.BvdManager;
 import dev.booky.betterview.listener.LevelListener;
 import dev.booky.betterview.listener.PlayerListener;
 import dev.booky.betterview.listener.TickListener;
+import dev.booky.betterview.nms.PaperNmsInterface;
 import dev.booky.betterview.platform.PaperBetterView;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jspecify.annotations.NullMarked;
 
 import java.nio.file.Path;
@@ -16,10 +19,16 @@ import java.nio.file.Path;
 public class BetterViewPlugin extends JavaPlugin {
 
     private final BvdManager manager;
+    private @MonotonicNonNull NamespacedKey listenerKey;
 
     public BetterViewPlugin() {
         Path configPath = this.getDataPath().resolve("config.yml");
         this.manager = new BvdManager(PaperBetterView::new, configPath);
+    }
+
+    @Override
+    public void onLoad() {
+        this.listenerKey = new NamespacedKey(this, "packets");
     }
 
     @Override
@@ -28,7 +37,16 @@ public class BetterViewPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this.manager), this);
         Bukkit.getPluginManager().registerEvents(new TickListener(this.manager), this);
 
+        // inject packet handling
+        PaperNmsInterface.SERVICE.injectPacketHandler(this.listenerKey);
+
         // run task after server has finished starting
         Bukkit.getScheduler().runTask(this, this.manager::onPostLoad);
+    }
+
+    @Override
+    public void onDisable() {
+        // uninject packet handling
+        PaperNmsInterface.SERVICE.uninjectPacketHandler(this.listenerKey);
     }
 }

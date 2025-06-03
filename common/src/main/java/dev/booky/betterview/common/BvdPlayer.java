@@ -111,9 +111,7 @@ public final class BvdPlayer {
         state.set(chunkX, chunkZ, SERVER_LOADED);
     }
 
-    public boolean serverChunkRemove(McChunkPos chunkPos) {
-        int chunkX = chunkPos.getX();
-        int chunkZ = chunkPos.getZ();
+    public boolean serverChunkRemove(int chunkX, int chunkZ) {
         boolean insideCylinder = BetterViewUtil.isWithinRange(
                 chunkX - this.chunkPos.getX(),
                 chunkZ - this.chunkPos.getZ(),

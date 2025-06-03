@@ -4,17 +4,20 @@ package dev.booky.betterview.nms.v1211;
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor;
 import ca.spottedleaf.moonrise.common.util.ChunkSystem;
 import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder;
+import dev.booky.betterview.common.BvdPlayer;
 import dev.booky.betterview.common.util.ChunkTagResult;
 import dev.booky.betterview.common.util.McChunkPos;
 import dev.booky.betterview.nms.PaperNmsInterface;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.papermc.paper.network.ChannelInitializeListenerHolder;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +29,7 @@ import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -154,5 +158,34 @@ public class NmsAdapter implements PaperNmsInterface {
         } finally {
             buf.release();
         }
+    }
+
+    @Override
+    public void injectPacketHandler(NamespacedKey listenerKey) {
+        ChannelInitializeListenerHolder.addListener(listenerKey, channel -> channel.pipeline()
+                .addBefore("packet_handler", BETTERVIEW_HANDLER, new PacketHandler()));
+        // inject existing connections
+        for (Connection connection : MinecraftServer.getServer().getConnection().getConnections()) {
+            connection.channel.pipeline()
+                    .addBefore("packet_handler",BETTERVIEW_HANDLER, new PacketHandler());
+        }
+    }
+
+    @Override
+    public void uninjectPacketHandler(NamespacedKey listenerKey) {
+        ChannelInitializeListenerHolder.removeListener(listenerKey);
+        // uninject existing connections
+        for (Connection connection : MinecraftServer.getServer().getConnection().getConnections()) {
+            connection.channel.pipeline().remove(BETTERVIEW_HANDLER);
+        }
+    }
+
+    @Override
+    public void saveNetworkPlayer(Channel channel, BvdPlayer bvdPlayer) {
+        PacketHandler handler = (PacketHandler) channel.pipeline().get(BETTERVIEW_HANDLER);
+        if (handler == null) {
+            throw new IllegalStateException("Can't save network player to " + channel + ", no handler found");
+        }
+        handler.setPlayer(bvdPlayer);
     }
 }

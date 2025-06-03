@@ -27,6 +27,7 @@ public class PaperPlayer implements PlayerHook {
         this.manager = manager;
         this.player = player;
         this.bvdPlayer = new BvdPlayer(this);
+        PaperNmsInterface.SERVICE.saveNetworkPlayer(this.getNettyChannel(), this.bvdPlayer);
     }
 
     @Override
