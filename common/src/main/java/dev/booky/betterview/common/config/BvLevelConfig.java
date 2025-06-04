@@ -3,7 +3,7 @@ package dev.booky.betterview.common.config;
 
 import org.jspecify.annotations.NullMarked;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 import java.time.Duration;
 
@@ -11,13 +11,13 @@ import java.time.Duration;
 @ConfigSerializable
 public class BvLevelConfig {
 
-    @Setting("Whether the extended view distance is enabled for this dimension or not")
+    @Comment("Whether the extended view distance is enabled for this dimension or not")
     private boolean enabled = true;
-    @Setting("How many new chunks can be generated for this level in one tick")
+    @Comment("How many new chunks can be generated for this level in one tick")
     private int chunkGenerationLimit = 2;
-    @Setting("The maximum extended view distance for this level")
+    @Comment("The maximum extended view distance for this level")
     private int viewDistance = 32;
-    @Setting("The cache duration for all extended chunks, after which they will be re-build")
+    @Comment("The cache duration for all extended chunks, after which they will be re-build")
     private Duration cacheDuration = Duration.ofMinutes(5L);
 
     public boolean isEnabled() {

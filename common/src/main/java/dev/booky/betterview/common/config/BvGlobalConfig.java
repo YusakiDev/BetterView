@@ -3,17 +3,17 @@ package dev.booky.betterview.common.config;
 
 import org.jspecify.annotations.NullMarked;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 @NullMarked
 @ConfigSerializable
 public class BvGlobalConfig {
 
-    @Setting("Whether the extended view distance is enabled or not")
+    @Comment("Whether the extended view distance is enabled or not")
     private boolean enabled = true;
-    @Setting("How many new chunks can be generated globally in one tick")
+    @Comment("How many new chunks can be generated globally in one tick")
     private int chunkGenerationLimit = 3;
-    @Setting("The maximum amount of chunks sent to a player in a tick")
+    @Comment("The maximum amount of chunks sent to a player in a tick")
     private int chunkSendLimit = 3;
 
     public boolean isEnabled() {
