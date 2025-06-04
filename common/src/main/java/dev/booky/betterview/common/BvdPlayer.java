@@ -184,6 +184,7 @@ public final class BvdPlayer {
 
     public void move(LevelHook newLevel, McChunkPos newPos) {
         if (newLevel != this.level) {
+            System.out.println("level changed");
             this.level = newLevel;
             if (this.enabled) {
                 this.handleDimensionReset(null);
@@ -195,6 +196,7 @@ public final class BvdPlayer {
         if (newPos.getKey() == previousPos.getKey()) {
             return; // nothing changed
         }
+        System.out.println("pos changed");
         this.chunkPos = newPos;
 
         // reset iteration index to ensure we iterate the chunk positions in the correct order
