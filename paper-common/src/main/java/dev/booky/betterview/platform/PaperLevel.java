@@ -19,7 +19,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 @NullMarked
 public class PaperLevel implements LevelHook {
@@ -41,7 +40,7 @@ public class PaperLevel implements LevelHook {
     }
 
     @Override
-    public @Nullable ByteBuf getCachedChunkBuf(McChunkPos chunkPos) {
+    public CompletableFuture<@Nullable ByteBuf> getCachedChunkBuf(McChunkPos chunkPos) {
         return PaperNmsInterface.SERVICE.getLoadedChunkBuf(this.world, chunkPos);
     }
 
@@ -51,8 +50,8 @@ public class PaperLevel implements LevelHook {
     }
 
     @Override
-    public void loadChunk(int chunkX, int chunkZ, Consumer<ByteBuf> onComplete) {
-        PaperNmsInterface.SERVICE.loadChunk(this.world, chunkX, chunkZ, onComplete);
+    public CompletableFuture<ByteBuf> loadChunk(int chunkX, int chunkZ) {
+        return PaperNmsInterface.SERVICE.loadChunk(this.world, chunkX, chunkZ);
     }
 
     @Override

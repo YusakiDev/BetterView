@@ -27,7 +27,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import org.bukkit.NamespacedKey;
@@ -39,7 +38,6 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 @NullMarked
 public class NmsAdapter implements PaperNmsInterface {
@@ -95,21 +93,24 @@ public class NmsAdapter implements PaperNmsInterface {
     }
 
     @Override
-    public @Nullable ByteBuf getLoadedChunkBuf(World world, McChunkPos chunkPos) {
+    public CompletableFuture<@Nullable ByteBuf> getLoadedChunkBuf(World world, McChunkPos chunkPos) {
         ServerLevel level = ((CraftWorld) world).getHandle();
         NewChunkHolder holder = level.moonrise$getChunkTaskScheduler().chunkHolderManager.getChunkHolder(chunkPos.getKey());
         if (holder == null) {
-            return null;
+            return CompletableFuture.completedFuture(null);
         }
         ChunkAccess access = holder.getChunkIfPresent(ChunkStatus.LIGHT);
-        return access instanceof LevelChunk ? ChunkWriter.writeFullOrEmpty(access) : null;
+        if (access == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+        return CompletableFuture.supplyAsync(() -> ChunkWriter.writeFullOrEmpty(access));
     }
 
     @Override
     public CompletableFuture<@Nullable ChunkTagResult> readChunkTag(World world, McChunkPos chunkPos) {
         ServerLevel level = ((CraftWorld) world).getHandle();
         ChunkPos nmsPos = new ChunkPos(chunkPos.getX(), chunkPos.getZ());
-        return level.chunkSource.chunkMap.read(nmsPos).thenApply(tag -> {
+        return level.chunkSource.chunkMap.read(nmsPos).thenApplyAsync(tag -> {
             if (tag.isEmpty()) {
                 return null;
             } else if (!ChunkTagTransformer.isChunkLit(tag.get())) {
@@ -121,10 +122,12 @@ public class NmsAdapter implements PaperNmsInterface {
     }
 
     @Override
-    public void loadChunk(World world, int chunkX, int chunkZ, Consumer<ByteBuf> onComplete) {
+    public CompletableFuture<ByteBuf> loadChunk(World world, int chunkX, int chunkZ) {
+        CompletableFuture<ByteBuf> future = new CompletableFuture<>();
         ServerLevel level = ((CraftWorld) world).getHandle();
         ChunkSystem.scheduleChunkLoad(level, chunkX, chunkZ, true, ChunkStatus.LIGHT, true, PrioritisedExecutor.Priority.LOW,
-                chunk -> onComplete.accept(ChunkWriter.writeFullOrEmpty(chunk)));
+                chunk -> future.completeAsync(() -> ChunkWriter.writeFullOrEmpty(chunk)));
+        return future;
     }
 
     @Override

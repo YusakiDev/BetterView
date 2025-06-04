@@ -12,16 +12,15 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 @NullMarked
 public interface LevelHook {
 
-    @Nullable ByteBuf getCachedChunkBuf(McChunkPos chunkPos);
+    CompletableFuture<@Nullable ByteBuf> getCachedChunkBuf(McChunkPos chunkPos);
 
     CompletableFuture<@Nullable ChunkTagResult> readChunk(McChunkPos chunkPos);
 
-    void loadChunk(int chunkX, int chunkZ, Consumer<ByteBuf> onComplete);
+    CompletableFuture<ByteBuf> loadChunk(int chunkX, int chunkZ);
 
     boolean checkChunkGeneration();
 

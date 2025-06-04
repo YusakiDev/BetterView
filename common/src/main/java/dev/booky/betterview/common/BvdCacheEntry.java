@@ -32,29 +32,26 @@ public final class BvdCacheEntry {
 
         // load chunk from level cache; I'm not sure whether this is thread-safe or not,
         // but this hasn't caused any issues yet - so I'll just assume it's thread-safe :)
-        ByteBuf chunkBuf = level.getCachedChunkBuf(pos);
-        if (chunkBuf != null) {
-            return CompletableFuture.completedFuture(chunkBuf);
-        }
-
-        // read chunk directly from storage; this is passed to an IO thread anyway, so it
-        // doesn't matter that this is called off-thread I think
-        return level.readChunk(pos).thenComposeAsync(chunkTag -> {
-            // if the is fully lit (chunk upgrading is done while reading), create chunk data directly
-            if (chunkTag != null && chunkTag.buffer() != null) {
-                return CompletableFuture.completedFuture(chunkTag.buffer());
-            } else if (chunkTag == null && level.isVoidWorld()) {
-                // skip useless chunk generation if this is a void world
-                return CompletableFuture.completedFuture(Unpooled.EMPTY_BUFFER);
-            } else if (!level.checkChunkGeneration()) {
-                // we aren't allowed to generate new chunks, return null
-                return CompletableFuture.completedFuture(null);
+        return level.getCachedChunkBuf(pos).thenCompose(chunkBuf -> {
+            if (chunkBuf != null) { // chunk is already loaded, return buffer
+                return CompletableFuture.completedFuture(chunkBuf);
             }
-
-            // call moonrise chunk system to generate chunk to LIGHT stage
-            CompletableFuture<ByteBuf> future = new CompletableFuture<>();
-            level.loadChunk(pos.getX(), pos.getZ(), future::complete);
-            return future;
+            // read chunk directly from storage; this is passed to an IO thread anyway, so it
+            // doesn't matter that this is called off-thread I think
+            return level.readChunk(pos).thenCompose(chunkTag -> {
+                // if the is fully lit (chunk upgrading is done while reading), create chunk data directly
+                if (chunkTag != null && chunkTag.buffer() != null) {
+                    return CompletableFuture.completedFuture(chunkTag.buffer());
+                } else if (chunkTag == null && level.isVoidWorld()) {
+                    // skip useless chunk generation if this is a void world
+                    return CompletableFuture.completedFuture(Unpooled.EMPTY_BUFFER);
+                } else if (!level.checkChunkGeneration()) {
+                    // we aren't allowed to generate new chunks, return null
+                    return CompletableFuture.completedFuture(null);
+                }
+                // call moonrise chunk system to generate chunk to LIGHT stage
+                return level.loadChunk(pos.getX(), pos.getZ());
+            });
         });
     }
 

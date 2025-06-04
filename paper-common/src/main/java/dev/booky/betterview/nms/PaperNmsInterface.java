@@ -38,11 +38,11 @@ public interface PaperNmsInterface {
 
     ByteBuf getClientboundLevelChunkWithLightPacketId();
 
-    @Nullable ByteBuf getLoadedChunkBuf(World world, McChunkPos chunkPos);
+    CompletableFuture<@Nullable ByteBuf> getLoadedChunkBuf(World world, McChunkPos chunkPos);
 
     CompletableFuture<@Nullable ChunkTagResult> readChunkTag(World world, McChunkPos chunkPos);
 
-    void loadChunk(World world, int chunkX, int chunkZ, Consumer<ByteBuf> onComplete);
+    CompletableFuture<ByteBuf> loadChunk(World world, int chunkX, int chunkZ);
 
     boolean checkVoidWorld(World world);
 
