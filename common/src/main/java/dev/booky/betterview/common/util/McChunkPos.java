@@ -43,8 +43,8 @@ public final class McChunkPos {
     }
 
     public int distanceSquared(McChunkPos other) {
-        int diffX = this.posX - other.posZ;
-        int diffZ = this.posX - other.posZ;
+        int diffX = this.posX - other.posX;
+        int diffZ = this.posZ - other.posZ;
         return diffX * diffX + diffZ * diffZ;
     }
 
