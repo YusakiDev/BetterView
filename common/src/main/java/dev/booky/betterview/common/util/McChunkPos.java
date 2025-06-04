@@ -70,4 +70,9 @@ public final class McChunkPos {
     public int hashCode() {
         return Objects.hash(this.posX, this.posZ);
     }
+
+    @Override
+    public String toString() {
+        return "Chunk[" + this.posX + ";" + this.posZ + ']';
+    }
 }

@@ -304,16 +304,10 @@ public final class BvdPlayer {
         if (chunkBuf == null) {
             // ran into generation limit, try again later
             state.lifecycle = UNLOADED;
+            // reset iteration index to prevent this entry from getting skipped
+            // until all other chunks have been loaded
+            this.iterationIndex = 0;
             return true;
-        }
-
-        if (false) { // TODO this is not the correct solution
-            // check whether this entry is the head of the queue; we don't
-            // want to skip sending chunks, as this would cause chunk
-            // generation to look messy on the client
-            if (this.chunkQueue.element() != entry) {
-                return false;
-            }
         }
 
         // if the chunk buffer is empty, assume it's an empty chunk and
