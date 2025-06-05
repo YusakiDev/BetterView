@@ -4,13 +4,12 @@ package dev.booky.betterview.nms.v1215;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.VarInt;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -22,6 +21,8 @@ public final class ChunkWriter {
 
     static final Heightmap.Types[] SENDABLE_HEIGHTMAP_TYPES = Arrays.stream(Heightmap.Types.values())
             .filter(Heightmap.Types::sendToClient).toArray(Heightmap.Types[]::new);
+    static final int[] SENDABLE_HEIGHTMAP_TYPE_IDS = Arrays.stream(SENDABLE_HEIGHTMAP_TYPES)
+            .mapToInt(Enum::ordinal).toArray();
 
     private ChunkWriter() {
     }
@@ -40,32 +41,31 @@ public final class ChunkWriter {
         return true;
     }
 
-    public static CompoundTag extractHeightmapTags(ChunkAccess chunk) {
-        CompoundTag heightmapsTag = new CompoundTag();
+    public static long[] @Nullable [] extractHeightmapsData(ChunkAccess chunk) {
+        long[] @Nullable [] heightmapsData = new long[SENDABLE_HEIGHTMAP_TYPES.length][];
         for (int i = 0, len = SENDABLE_HEIGHTMAP_TYPES.length; i < len; i++) {
             Heightmap.Types type = SENDABLE_HEIGHTMAP_TYPES[i];
             if (chunk.hasPrimedHeightmap(type)) {
-                long[] heightmapData = chunk.getOrCreateHeightmapUnprimed(type).getRawData();
-                heightmapsTag.put(type.getSerializationKey(), new LongArrayTag(heightmapData));
+                heightmapsData[i] = chunk.getOrCreateHeightmapUnprimed(type).getRawData();
             }
         }
-        return heightmapsTag;
+        return heightmapsData;
     }
 
     public static ByteBuf writeFullOrEmpty(ChunkAccess chunk) {
         if (isEmpty(chunk)) {
             return Unpooled.EMPTY_BUFFER;
         }
-        CompoundTag heightmapTags = extractHeightmapTags(chunk);
+        long[] @Nullable [] heightmapsData = extractHeightmapsData(chunk);
         // convert lighting data
         byte[][] blockLight = LightWriter.convertStarlightToBytes(chunk.starlight$getBlockNibbles(), false);
         byte[][] skyLight = LightWriter.convertStarlightToBytes(chunk.starlight$getSkyNibbles(), true);
         // delegate to chunk writing method
-        return writeFull(chunk.locX, chunk.locZ, heightmapTags, chunk.getSections(), blockLight, skyLight);
+        return writeFull(chunk.locX, chunk.locZ, heightmapsData, chunk.getSections(), blockLight, skyLight);
     }
 
     public static ByteBuf writeFull(
-            int chunkX, int chunkZ, CompoundTag heightmapsTag,
+            int chunkX, int chunkZ, long[] @Nullable [] heightmapsData,
             LevelChunkSection[] sections, byte[][] blockLight, byte @Nullable [][] skyLight
     ) {
         // allocate pooled buffer
@@ -77,25 +77,51 @@ public final class ChunkWriter {
             buf.writeInt(chunkX);
             buf.writeInt(chunkZ);
             // write buffer body
-            writeFullBody(buf, heightmapsTag, sections, blockLight, skyLight);
+            writeFullBody(buf, heightmapsData, sections, blockLight, skyLight);
             return buf.retain();
         } finally {
             buf.release();
         }
     }
 
+    private static void writeHeightmaps(ByteBuf buf, long[] @Nullable [] heightmapsData) {
+        // count how many heightmap entries are actually present
+        int heightmapsLen = heightmapsData.length;
+        int heightmapsCount = 0;
+        for (int i = 0; i < heightmapsLen; i++) {
+            if (heightmapsData[i] != null) {
+                heightmapsCount++;
+            }
+        }
+        // write present heightmap entries
+        VarInt.write(buf, heightmapsCount);
+        for (int i = 0; i < heightmapsLen; i++) {
+            long[] data = heightmapsData[i];
+            if (data != null) {
+                // convert to actual heightmap id and then write
+                VarInt.write(buf, SENDABLE_HEIGHTMAP_TYPE_IDS[i]);
+                // write raw heightmap data
+                FriendlyByteBuf.writeLongArray(buf, data);
+            }
+        }
+    }
+
     public static void writeFullBody(
             ByteBuf buf,
-            CompoundTag heightmapsTag, LevelChunkSection[] sections,
+            long[] @Nullable [] heightmapsData, LevelChunkSection[] sections,
             byte[][] blockLight, byte @Nullable [][] skyLight
     ) {
         // calculate serialized size of chunk data
         int serializedSize = 0;
         for (int i = 0, len = sections.length; i < len; i++) {
-            serializedSize += sections[i].getSerializedSize();
+            LevelChunkSection section = sections[i];
+            serializedSize += section.getSerializedSize()
+                    // fix https://bugs.mojang.com/browse/MC-296121
+                    - VarInt.getByteSize(section.states.data.storage().getRaw().length)
+                    - VarInt.getByteSize(((PalettedContainer<?>) section.getBiomes()).data.storage().getRaw().length);
         }
-        // write heightmaps nbt tag
-        FriendlyByteBuf.writeNbt(buf, heightmapsTag);
+        // write heightmaps data
+        writeHeightmaps(buf, heightmapsData);
         // directly write chunk data, don't create useless sub-buffer
         VarInt.write(buf, serializedSize);
         int expectedWriterIndex = buf.writerIndex() + serializedSize;

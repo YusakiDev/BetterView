@@ -17,7 +17,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.server.MinecraftServer;
@@ -43,15 +42,15 @@ import java.util.concurrent.CompletableFuture;
 public class NmsAdapter implements PaperNmsInterface {
 
     // magic packet id values
-    static final byte FORGET_LEVEL_CHUNK_PACKET_ID = 0x22;
+    static final byte FORGET_LEVEL_CHUNK_PACKET_ID = 0x21;
     static final ByteBuf FORGET_LEVEL_CHUNK_PACKET_ID_BUF =
             Unpooled.wrappedBuffer(new byte[]{FORGET_LEVEL_CHUNK_PACKET_ID});
-    static final byte LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = 0x28;
+    static final byte LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = 0x27;
     static final ByteBuf LEVEL_CHUNK_WITH_LIGHT_PACKET_ID_BUF =
             Unpooled.wrappedBuffer(new byte[]{LEVEL_CHUNK_WITH_LIGHT_PACKET_ID});
 
     public NmsAdapter() {
-        if (SharedConstants.getProtocolVersion() != 769) {
+        if (SharedConstants.getProtocolVersion() != 770) {
             throw new UnsupportedOperationException();
         }
     }
@@ -154,10 +153,10 @@ public class NmsAdapter implements PaperNmsInterface {
 
         ByteBuf buf = Unpooled.buffer();
         try {
-            CompoundTag heightmapTags = ChunkWriter.extractHeightmapTags(chunk);
+            long[] @Nullable [] heightmapsData = ChunkWriter.extractHeightmapsData(chunk);
             byte[][] blockLight = LightWriter.convertStarlightToBytes(chunk.starlight$getBlockNibbles(), false);
             byte[][] skyLight = LightWriter.convertStarlightToBytes(chunk.starlight$getSkyNibbles(), true);
-            ChunkWriter.writeFullBody(buf, heightmapTags, chunk.getSections(), blockLight, skyLight);
+            ChunkWriter.writeFullBody(buf, heightmapsData, chunk.getSections(), blockLight, skyLight);
             return buf.retain();
         } finally {
             buf.release();
