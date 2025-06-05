@@ -9,7 +9,7 @@ import dev.booky.betterview.common.hooks.PlayerHook;
 import dev.booky.betterview.common.util.BetterViewUtil;
 import dev.booky.betterview.common.util.BypassedPacket;
 import dev.booky.betterview.common.util.McChunkPos;
-import dev.booky.betterview.util.MagicUtil;
+import dev.booky.betterview.util.PacketUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -85,7 +85,7 @@ public abstract class ServerPlayerMixin extends Player {
     }
 
     public void betterview$sendChunkUnload(int chunkX, int chunkZ) {
-        ByteBuf packetId = MagicUtil.FORGET_LEVEL_CHUNK_PACKET_ID_BUF.retainedSlice();
+        ByteBuf packetId = PacketUtil.FORGET_LEVEL_CHUNK_PACKET_ID_BUF.retainedSlice();
         ByteBuf chunkPos = BetterViewUtil.encodeChunkPos(McChunkPos.getChunkKey(chunkX, chunkZ));
         CompositeByteBuf packetBuf = PooledByteBufAllocator.DEFAULT.compositeBuffer(2)
                 .addComponent(true, packetId)

@@ -11,9 +11,14 @@
   ],
 
   "license": "GPL-3.0-only",
-  "environment": "server",
+  "environment": "*",
   "accessWidener": "betterview.accesswidener",
 
+  "entrypoints": {
+    "main": [
+      "dev.booky.betterview.BetterViewMod"
+    ]
+  },
   "mixins": [
     "betterview.mixins.json"
   ],
