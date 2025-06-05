@@ -9,7 +9,7 @@ import dev.booky.betterview.common.hooks.PlayerHook;
 import dev.booky.betterview.common.util.BetterViewUtil;
 import dev.booky.betterview.common.util.BypassedPacket;
 import dev.booky.betterview.common.util.McChunkPos;
-import dev.booky.betterview.util.PacketUtil;
+import dev.booky.betterview.packet.PacketUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;

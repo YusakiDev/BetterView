@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @NullMarked
-@Mixin(RegionizedPlayerChunkLoader.class)
+@Mixin(value = RegionizedPlayerChunkLoader.class, remap = false)
 public class RegionizedPlayerChunkLoaderMixin {
 
     @Inject(
@@ -19,8 +19,10 @@ public class RegionizedPlayerChunkLoaderMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Lca/spottedleaf/moonrise/patches/chunk_system/player/RegionizedPlayerChunkLoader$PlayerChunkLoaderData;add()V",
-                    shift = At.Shift.AFTER
-            )
+                    shift = At.Shift.AFTER,
+                    remap = false
+            ),
+            remap = false
     )
     private void postPlayerLoaderAdd(ServerPlayer player, CallbackInfo ci) {
         ((PlayerHook) player).getBvdPlayer().tryTriggerStart();

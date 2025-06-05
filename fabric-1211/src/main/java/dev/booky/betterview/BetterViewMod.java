@@ -32,7 +32,7 @@ public class BetterViewMod implements BetterViewHook, ModInitializer {
     private @Nullable WeakReference<MinecraftServer> server = null;
     private @Nullable BvdManager manager;
 
-    private BetterViewMod() {
+    public BetterViewMod() {
         if (INSTANCE != null) {
             throw new IllegalStateException("Mod has already been constructed");
         }

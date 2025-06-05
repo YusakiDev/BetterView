@@ -22,7 +22,8 @@ public class PlayerListMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
-                    shift = At.Shift.AFTER
+                    shift = At.Shift.AFTER,
+                    remap = false
             )
     )
     private void postPlayerAdd(CallbackInfo ci, @Local(argsOnly = true) ServerPlayer player) {
@@ -35,7 +36,8 @@ public class PlayerListMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
-                    shift = At.Shift.AFTER
+                    shift = At.Shift.AFTER,
+                    remap = false
             )
     )
     private void postPlayerRespawn(CallbackInfoReturnable<ServerPlayer> ci, @Local(ordinal = 1) ServerPlayer player) {
