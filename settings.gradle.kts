@@ -12,7 +12,7 @@ pluginManagement {
 include("common")
 
 include("paper-common", "paper")
-sequenceOf("1.21.1", "1.21.3")
+sequenceOf("1.21.1", "1.21.3", "1.21.4")
     .map { it.replace(".", "") }
     .forEach { include("paper-$it") }
 
