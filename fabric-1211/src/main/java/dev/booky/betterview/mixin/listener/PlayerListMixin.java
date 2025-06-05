@@ -4,6 +4,10 @@ package dev.booky.betterview.mixin.listener;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.booky.betterview.BetterViewMod;
 import dev.booky.betterview.common.BvdManager;
+import dev.booky.betterview.common.hooks.PlayerHook;
+import dev.booky.betterview.packet.PacketHandler;
+import io.netty.channel.ChannelHandler;
+import net.minecraft.network.Connection;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import org.jspecify.annotations.NullMarked;
@@ -29,6 +33,23 @@ public class PlayerListMixin {
     private void postPlayerAdd(CallbackInfo ci, @Local(argsOnly = true) ServerPlayer player) {
         BvdManager manager = BetterViewMod.INSTANCE.getManager();
         manager.getPlayer(player.getUUID()); // load player
+    }
+
+    @Inject(
+            method = "placeNewPlayer",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/network/Connection;setupInboundProtocol(Lnet/minecraft/network/ProtocolInfo;Lnet/minecraft/network/PacketListener;)V",
+                    shift = At.Shift.AFTER
+            )
+    )
+    private void postGameProtocolSetup(
+            CallbackInfo ci,
+            @Local(argsOnly = true) Connection connection,
+            @Local(argsOnly = true) ServerPlayer player
+    ) {
+        ChannelHandler handler = connection.channel.pipeline().get(PacketHandler.HANDLER_NAME);
+        ((PacketHandler) handler).setPlayer(((PlayerHook) player).getBvdPlayer());
     }
 
     @Inject(
