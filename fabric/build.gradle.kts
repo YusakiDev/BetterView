@@ -1,5 +1,6 @@
 import net.fabricmc.loom.task.AbstractRemapJarTask
 import net.fabricmc.loom.task.RemapJarTask
+import net.fabricmc.loom.task.prod.ServerProductionRunTask
 
 plugins {
     alias(libs.plugins.loom)
@@ -9,6 +10,7 @@ plugins {
 loom.noIntermediateMappings()
 
 val includeAll: Configuration by configurations.creating
+val runtimeMods: Configuration by configurations.creating
 
 dependencies {
     // dummy fabric env setup
@@ -26,6 +28,14 @@ dependencies {
             exclude("org.jspecify") // useless
         }
     }
+
+    // include all fabric versions
+    rootProject.subprojects
+        .filter { it.name.matches("^fabric-\\d+$".toRegex()) }
+        .forEach { include(it) }
+
+    // version-specific runtime mods
+    runtimeMods(libs.moonrise.v1211)
 }
 
 tasks.named<ProcessResources>("processResources") {
@@ -44,18 +54,6 @@ tasks.named<RemapJarTask>("remapJar") {
         dep.children.forEach { doInclude(it) }
     }
     includeAll.resolvedConfiguration.firstLevelModuleDependencies.forEach { doInclude(it) }
-    // include all fabric versions
-    rootProject.subprojects
-        .filter { it.name.startsWith("fabric-") }
-        .forEach { subproject ->
-            // as the subproject hasn't been initialized yet,
-            // we can't just use tasks.named
-            subproject.tasks
-                .matching { it.name == "remapJar" }
-                .configureEach {
-                    nestedJars.from(this)
-                }
-        }
     // final fabric jar, place it in root build dir
     destinationDirectory = rootProject.layout.buildDirectory.dir("libs")
 }
@@ -66,4 +64,39 @@ tasks.withType<AbstractRemapJarTask> {
 
 loom {
     mixin.defaultRefmapName = "${rootProject.name}-${project.name}-refmap.json".lowercase()
+}
+
+// fabric's default task doesn't allow us to specify that we want to have standard input
+@UntrackedTask(because = "Always rerun this task.")
+abstract class CustomServerProductionRunTask : ServerProductionRunTask {
+
+    @Inject
+    constructor() : super()
+
+    override fun configureProgramArgs(exec: ExecSpec?) {
+        super.configureProgramArgs(exec)
+        exec!!.standardInput = System.`in`
+    }
+}
+
+tasks.register<CustomServerProductionRunTask>("prodServer") {
+    minecraftVersion = "1.21.1"
+    loaderVersion = libs.versions.fabric.loader
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    // include all fabric versions
+    rootProject.subprojects
+        .filter { it.name.startsWith("fabric-") }
+        .forEach { subproject ->
+            // as the subproject hasn't been initialized yet,
+            // we can't just use tasks.named
+            subproject.tasks
+                .matching { it.name == "remapJar" }
+                .configureEach {
+                    mods.from(this)
+                }
+        }
+    // include runtime mods
+    mods.from(runtimeMods)
 }
