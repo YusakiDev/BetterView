@@ -21,6 +21,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.UUID;
 
 @NullMarked
@@ -52,6 +53,16 @@ public class BetterViewMod implements BetterViewHook, ModInitializer {
     @Override
     public void onInitialize() {
         // NO-OP
+    }
+
+    public void triggerPostLoad(Set<ResourceKey<Level>> levelKeys) {
+        // eagerly load all available dimensions once on startup to allow
+        // population of config file - every other dimension gets lazy loaded
+        for (ResourceKey<Level> levelKey : levelKeys) {
+            this.manager.getConfig(levelKey.location());
+        }
+        // call post-load action
+        this.manager.onPostLoad();
     }
 
     @Override

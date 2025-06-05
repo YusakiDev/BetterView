@@ -2,18 +2,26 @@ package dev.booky.betterview.mixin.listener;
 // Created by booky10 in BetterView (04:11 05.06.2025)
 
 import dev.booky.betterview.BetterViewMod;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.Level;
 import org.jspecify.annotations.NullMarked;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.lang.ref.WeakReference;
+import java.util.Set;
 
 @NullMarked
 @Mixin(MinecraftServer.class)
-public class MinecraftServerMixin {
+public abstract class MinecraftServerMixin {
+
+    @Shadow
+    public abstract Set<ResourceKey<Level>> levelKeys();
 
     @Inject(
             method = "<init>",
@@ -29,5 +37,18 @@ public class MinecraftServerMixin {
     )
     private void postServerTick(CallbackInfo ci) {
         BetterViewMod.INSTANCE.getManager().runTick();
+    }
+
+    @Inject(
+            method = "runServer",
+            at = @At(
+                    value = "FIELD",
+                    target = "Lnet/minecraft/server/MinecraftServer;status:Lnet/minecraft/network/protocol/status/ServerStatus;",
+                    opcode = Opcodes.PUTFIELD,
+                    shift = At.Shift.AFTER
+            )
+    )
+    private void postServerInit(CallbackInfo ci) {
+        BetterViewMod.INSTANCE.triggerPostLoad(this.levelKeys());
     }
 }
