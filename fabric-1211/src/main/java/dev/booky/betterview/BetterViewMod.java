@@ -57,7 +57,7 @@ public class BetterViewMod implements BetterViewHook, ModInitializer {
         // eagerly load all available dimensions once on startup to allow
         // population of config file - every other dimension gets lazy loaded
         for (ResourceKey<Level> levelKey : levelKeys) {
-            manager.getConfig(levelKey.location());
+            manager.getLevel(levelKey.location());
         }
         // call post-load action
         manager.onPostLoad();
