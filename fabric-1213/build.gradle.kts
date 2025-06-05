@@ -13,9 +13,7 @@ dependencies {
     modImplementation(libs.fabric.loader)
 
     // common project setup
-    api(projects.common) {
-        exclude(group = "net.kyori")
-    }
+    api(projects.common)
 
     // adventure platform for better integration with everything
     modImplementation(libs.adventure.platform.fabric.v1213)

@@ -24,7 +24,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.PalettedContainerRO;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
-import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import net.minecraft.world.level.chunk.storage.SerializableChunkData;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -33,9 +33,6 @@ import static dev.booky.betterview.fabric.v1213.packet.ChunkWriter.SENDABLE_HEIG
 @NullMarked
 public final class ChunkTagTransformer {
 
-    // see SaveUtil#STARLIGHT_VERSION_TAG
-    private static final String STARLIGHT_VERSION_TAG = "starlight.light_version";
-
     private ChunkTagTransformer() {
     }
 
@@ -43,11 +40,11 @@ public final class ChunkTagTransformer {
         ChunkStatus status = ChunkStatus.byName(tag.getString("Status"));
         if (!status.isOrAfter(ChunkStatus.LIGHT)) {
             return false; // not lit yet
-        } else if (tag.get(ChunkSerializer.IS_LIGHT_ON_TAG) == null) {
+        } else if (tag.get(SerializableChunkData.IS_LIGHT_ON_TAG) == null) {
             return false; // light isn't activated
         }
         // check whether starlight version matches
-        int lightVersion = tag.getInt(STARLIGHT_VERSION_TAG);
+        int lightVersion = tag.getInt(SaveUtil.STARLIGHT_VERSION_TAG);
         return lightVersion == SaveUtil.getLightVersion();
     }
 
@@ -57,10 +54,10 @@ public final class ChunkTagTransformer {
             byte[][] blockLight,
             byte @Nullable [][] skyLight
     ) {
-        Registry<Biome> biomeRegistry = level.registryAccess().registryOrThrow(Registries.BIOME);
-        Codec<PalettedContainerRO<Holder<Biome>>> biomeCodec = ChunkSerializer.makeBiomeCodec(biomeRegistry);
+        Registry<Biome> biomeRegistry = level.registryAccess().lookupOrThrow(Registries.BIOME);
+        Codec<PalettedContainerRO<Holder<Biome>>> biomeCodec = SerializableChunkData.makeBiomeCodec(biomeRegistry);
 
-        ListTag sectionTags = chunkTag.getList(ChunkSerializer.SECTIONS_TAG, Tag.TAG_COMPOUND);
+        ListTag sectionTags = chunkTag.getList(SerializableChunkData.SECTIONS_TAG, Tag.TAG_COMPOUND);
         int minLightSection = WorldUtil.getMinLightSection(level);
 
         boolean onlyAir = true;
@@ -72,7 +69,7 @@ public final class ChunkTagTransformer {
             if (sectionIndex >= 0 && sectionIndex < sections.length) {
                 PalettedContainer<BlockState> blocks;
                 if (sectionTag.contains("block_states", Tag.TAG_COMPOUND)) {
-                    blocks = ChunkSerializer.BLOCK_STATE_CODEC
+                    blocks = SerializableChunkData.BLOCK_STATE_CODEC
                             .parse(NbtOps.INSTANCE, sectionTag.getCompound("block_states"))
                             .getOrThrow();
                 } else {
@@ -91,7 +88,7 @@ public final class ChunkTagTransformer {
                 } else {
                     biomes = new PalettedContainer<>(
                             biomeRegistry.asHolderIdMap(),
-                            biomeRegistry.getHolderOrThrow(Biomes.PLAINS),
+                            biomeRegistry.getOrThrow(Biomes.PLAINS),
                             PalettedContainer.Strategy.SECTION_BIOMES
                     );
                 }
@@ -104,19 +101,19 @@ public final class ChunkTagTransformer {
                 }
             }
 
-            if (sectionTag.contains(ChunkSerializer.BLOCK_LIGHT_TAG, Tag.TAG_BYTE_ARRAY)) {
-                blockLight[sectionY - minLightSection] = sectionTag.getByteArray(ChunkSerializer.BLOCK_LIGHT_TAG);
+            if (sectionTag.contains(SerializableChunkData.BLOCK_LIGHT_TAG, Tag.TAG_BYTE_ARRAY)) {
+                blockLight[sectionY - minLightSection] = sectionTag.getByteArray(SerializableChunkData.BLOCK_LIGHT_TAG);
             }
 
-            if (skyLight != null && sectionTag.contains(ChunkSerializer.SKY_LIGHT_TAG, Tag.TAG_BYTE_ARRAY)) {
-                skyLight[sectionY - minLightSection] = sectionTag.getByteArray(ChunkSerializer.SKY_LIGHT_TAG);
+            if (skyLight != null && sectionTag.contains(SerializableChunkData.SKY_LIGHT_TAG, Tag.TAG_BYTE_ARRAY)) {
+                skyLight[sectionY - minLightSection] = sectionTag.getByteArray(SerializableChunkData.SKY_LIGHT_TAG);
             }
         }
         return onlyAir;
     }
 
     private static CompoundTag filterHeightmaps(CompoundTag chunkTag) {
-        CompoundTag heightmaps = chunkTag.getCompound(ChunkSerializer.HEIGHTMAPS_TAG);
+        CompoundTag heightmaps = chunkTag.getCompound(SerializableChunkData.HEIGHTMAPS_TAG);
         if (heightmaps.isEmpty()) {
             return heightmaps;
         }

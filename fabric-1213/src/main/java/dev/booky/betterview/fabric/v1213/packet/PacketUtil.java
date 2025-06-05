@@ -20,10 +20,10 @@ import org.jspecify.annotations.NullMarked;
 public class PacketUtil {
 
     // magic packet id values
-    public static final byte FORGET_LEVEL_CHUNK_PACKET_ID = 0x21;
+    public static final byte FORGET_LEVEL_CHUNK_PACKET_ID = 0x22;
     public static final ByteBuf FORGET_LEVEL_CHUNK_PACKET_ID_BUF =
             Unpooled.wrappedBuffer(new byte[]{FORGET_LEVEL_CHUNK_PACKET_ID});
-    public static final byte LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = 0x27;
+    public static final byte LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = 0x28;
     public static final ByteBuf LEVEL_CHUNK_WITH_LIGHT_PACKET_ID_BUF =
             Unpooled.wrappedBuffer(new byte[]{LEVEL_CHUNK_WITH_LIGHT_PACKET_ID});
 
@@ -31,8 +31,8 @@ public class PacketUtil {
     }
 
     public static ByteBuf buildEmptyChunkData(ServerLevel level) {
-        Registry<Biome> biomeRegistry = level.registryAccess().registryOrThrow(Registries.BIOME);
-        Holder.Reference<Biome> biome = biomeRegistry.getHolderOrThrow(Biomes.THE_VOID);
+        Registry<Biome> biomeRegistry = level.registryAccess().lookupOrThrow(Registries.BIOME);
+        Holder.Reference<Biome> biome = biomeRegistry.getOrThrow(Biomes.THE_VOID);
         EmptyLevelChunk chunk = new EmptyLevelChunk(level, ChunkPos.ZERO, biome);
 
         ByteBuf buf = Unpooled.buffer();

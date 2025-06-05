@@ -35,7 +35,7 @@ dependencies {
         .forEach { include(it) }
 
     // version-specific runtime mods
-    runtimeMods(libs.moonrise.v1211)
+    runtimeMods(libs.moonrise.v1213)
 }
 
 tasks.named<ProcessResources>("processResources") {
@@ -80,23 +80,11 @@ abstract class CustomServerProductionRunTask : ServerProductionRunTask {
 }
 
 tasks.register<CustomServerProductionRunTask>("prodServer") {
-    minecraftVersion = "1.21.1"
+    minecraftVersion = "1.21.3"
     loaderVersion = libs.versions.fabric.loader
     javaLauncher = javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(21)
     }
-    // include all fabric versions
-    rootProject.subprojects
-        .filter { it.name.startsWith("fabric-") }
-        .forEach { subproject ->
-            // as the subproject hasn't been initialized yet,
-            // we can't just use tasks.named
-            subproject.tasks
-                .matching { it.name == "remapJar" }
-                .configureEach {
-                    mods.from(this)
-                }
-        }
     // include runtime mods
     mods.from(runtimeMods)
 }
