@@ -9,6 +9,7 @@
   },
   "mixins": [
     "listener.MinecraftServerMixin",
+    "listener.PlayerListMixin",
     "listener.RegionizedPlayerChunkLoaderMixin",
     "platform.ServerLevelMixin",
     "platform.ServerPlayerMixin"
