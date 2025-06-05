@@ -16,7 +16,7 @@
 
   "entrypoints": {
     "main": [
-      "dev.booky.betterview.BetterViewMod"
+      "dev.booky.betterview.fabric.v1211.BetterViewMod"
     ]
   },
   "mixins": [

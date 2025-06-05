@@ -1,4 +1,4 @@
-package dev.booky.betterview.mixin.listener;
+package dev.booky.betterview.fabric.v1211.mixin.listener;
 // Created by booky10 in BetterView (03:59 05.06.2025)
 
 import ca.spottedleaf.moonrise.patches.chunk_system.player.RegionizedPlayerChunkLoader;

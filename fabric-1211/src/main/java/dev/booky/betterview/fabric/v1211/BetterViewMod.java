@@ -1,4 +1,4 @@
-package dev.booky.betterview;
+package dev.booky.betterview.fabric.v1211;
 // Created by booky10 in BetterView (04:12 05.06.2025)
 
 import dev.booky.betterview.common.BvdManager;

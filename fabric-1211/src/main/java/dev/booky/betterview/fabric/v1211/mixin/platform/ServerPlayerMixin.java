@@ -1,4 +1,4 @@
-package dev.booky.betterview.mixin.platform;
+package dev.booky.betterview.fabric.v1211.mixin.platform;
 // Created by booky10 in BetterView (04:00 05.06.2025)
 
 import ca.spottedleaf.moonrise.common.util.ChunkSystem;
@@ -9,7 +9,7 @@ import dev.booky.betterview.common.hooks.PlayerHook;
 import dev.booky.betterview.common.util.BetterViewUtil;
 import dev.booky.betterview.common.util.BypassedPacket;
 import dev.booky.betterview.common.util.McChunkPos;
-import dev.booky.betterview.packet.PacketUtil;
+import dev.booky.betterview.fabric.v1211.packet.PacketUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;

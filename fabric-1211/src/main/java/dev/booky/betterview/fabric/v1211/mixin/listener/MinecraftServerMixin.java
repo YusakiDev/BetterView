@@ -1,7 +1,7 @@
-package dev.booky.betterview.mixin.listener;
+package dev.booky.betterview.fabric.v1211.mixin.listener;
 // Created by booky10 in BetterView (04:11 05.06.2025)
 
-import dev.booky.betterview.BetterViewMod;
+import dev.booky.betterview.fabric.v1211.BetterViewMod;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;

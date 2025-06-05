@@ -1,4 +1,4 @@
-package dev.booky.betterview.mixin.platform;
+package dev.booky.betterview.fabric.v1211.mixin.platform;
 // Created by booky10 in BetterView (04:24 05.06.2025)
 
 import ca.spottedleaf.moonrise.common.util.ChunkSystem;
@@ -6,16 +6,16 @@ import ca.spottedleaf.moonrise.libs.ca.spottedleaf.concurrentutil.util.Priority;
 import ca.spottedleaf.moonrise.patches.chunk_system.level.ChunkSystemServerLevel;
 import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import dev.booky.betterview.BetterViewMod;
+import dev.booky.betterview.fabric.v1211.BetterViewMod;
 import dev.booky.betterview.common.BvdCacheEntry;
 import dev.booky.betterview.common.config.BvLevelConfig;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.util.BetterViewUtil;
 import dev.booky.betterview.common.util.ChunkTagResult;
 import dev.booky.betterview.common.util.McChunkPos;
-import dev.booky.betterview.packet.ChunkTagTransformer;
-import dev.booky.betterview.packet.ChunkWriter;
-import dev.booky.betterview.packet.PacketUtil;
+import dev.booky.betterview.fabric.v1211.packet.ChunkTagTransformer;
+import dev.booky.betterview.fabric.v1211.packet.ChunkWriter;
+import dev.booky.betterview.fabric.v1211.packet.PacketUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import net.kyori.adventure.key.Key;

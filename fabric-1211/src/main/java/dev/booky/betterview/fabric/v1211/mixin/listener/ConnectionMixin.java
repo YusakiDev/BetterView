@@ -1,7 +1,7 @@
-package dev.booky.betterview.mixin.listener;
+package dev.booky.betterview.fabric.v1211.mixin.listener;
 // Created by booky10 in BetterView (05:08 05.06.2025)
 
-import dev.booky.betterview.packet.PacketHandler;
+import dev.booky.betterview.fabric.v1211.packet.PacketHandler;
 import io.netty.channel.ChannelPipeline;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;

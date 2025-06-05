@@ -1,4 +1,4 @@
-package dev.booky.betterview.packet;
+package dev.booky.betterview.fabric.v1211.packet;
 // Created by booky10 in BetterView (21:19 03.06.2025)
 
 import ca.spottedleaf.moonrise.common.util.WorldUtil;
@@ -28,7 +28,7 @@ import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import static dev.booky.betterview.packet.ChunkWriter.SENDABLE_HEIGHTMAP_TYPES;
+import static dev.booky.betterview.fabric.v1211.packet.ChunkWriter.SENDABLE_HEIGHTMAP_TYPES;
 
 @NullMarked
 public final class ChunkTagTransformer {

@@ -1,8 +1,8 @@
-package dev.booky.betterview.packet;
+package dev.booky.betterview.fabric.v1211.packet;
 // Created by booky10 in BetterView (21:00 03.06.2025)
 
 import ca.spottedleaf.moonrise.patches.starlight.light.SWMRNibbleArray;
-import dev.booky.betterview.mixin.accessor.SWMRNibbleArrayAccessor;
+import dev.booky.betterview.fabric.v1211.mixin.accessor.SWMRNibbleArrayAccessor;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.VarInt;

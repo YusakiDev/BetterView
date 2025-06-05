@@ -1,4 +1,4 @@
-package dev.booky.betterview.mixin.accessor;
+package dev.booky.betterview.fabric.v1211.mixin.accessor;
 // Created by booky10 in BetterView (05:02 05.06.2025)
 
 import ca.spottedleaf.moonrise.patches.starlight.light.SWMRNibbleArray;

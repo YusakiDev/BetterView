@@ -1,4 +1,4 @@
-package dev.booky.betterview.packet;
+package dev.booky.betterview.fabric.v1211.packet;
 // Created by booky10 in BetterView (20:38 03.06.2025)
 
 import ca.spottedleaf.moonrise.patches.starlight.chunk.StarlightChunk;
