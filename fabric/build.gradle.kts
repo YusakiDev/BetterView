@@ -8,10 +8,24 @@ plugins {
 // intermediary mappings are useless here
 loom.noIntermediateMappings()
 
+val includeAll: Configuration by configurations.creating
+
 dependencies {
     // dummy fabric env setup
     minecraft(libs.minecraft.base)
     mappings(loom.officialMojangMappings())
+
+    // include common project once
+    include(projects.common)
+
+    // include common dependencies
+    sequenceOf(libs.caffeine, libs.configurate.yaml).forEach {
+        includeAll(it) {
+            exclude("net.kyori", "option") // included in adventure platforms
+            exclude("com.google.errorprone", "error_prone_annotations") // useless
+            exclude("org.jspecify") // useless
+        }
+    }
 }
 
 tasks.named<ProcessResources>("processResources") {
@@ -22,6 +36,15 @@ tasks.named<ProcessResources>("processResources") {
 }
 
 tasks.named<RemapJarTask>("remapJar") {
+    // include common dependencies transitively
+    fun doInclude(dep: ResolvedDependency) {
+        configurations.named("include").get().withDependencies {
+            this.add(dependencyFactory.create(dep.moduleGroup, dep.moduleName, dep.moduleVersion))
+        }
+        dep.children.forEach { doInclude(it) }
+    }
+    includeAll.resolvedConfiguration.firstLevelModuleDependencies.forEach { doInclude(it) }
+    // include all fabric versions
     rootProject.subprojects
         .filter { it.name.startsWith("fabric-") }
         .forEach { subproject ->

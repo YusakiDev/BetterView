@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "betterview-common",
+  "version": "${version}",
+  "name": "BetterView Common",
+
+  "icon": "assets/betterview/icon.png",
+  "description": "Implements asynchronous lightweight view distance",
+  "authors": [
+    "booky10"
+  ],
+
+  "license": "GPL-3.0-only",
+  "environment": "*",
+
+  "depends": {
+    "java": ">=21"
+  },
+
+  "custom": {
+    "modmenu": {
+      "parent": "betterview"
+    }
+  }
+}
