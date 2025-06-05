@@ -6,5 +6,11 @@
   "injectors": {
     "defaultRequire": 1,
     "maxShiftBy": 1
-  }
+  },
+  "mixins": [
+    "listener.MinecraftServerMixin",
+    "listener.RegionizedPlayerChunkLoaderMixin",
+    "platform.ServerLevelMixin",
+    "platform.ServerPlayerMixin"
+  ]
 }

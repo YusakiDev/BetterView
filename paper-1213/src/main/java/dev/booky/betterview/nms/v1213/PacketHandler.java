@@ -2,7 +2,7 @@ package dev.booky.betterview.nms.v1213;
 // Created by booky10 in BetterView (22:48 03.06.2025)
 
 import dev.booky.betterview.common.BvdPlayer;
-import dev.booky.betterview.nms.BypassedPacket;
+import dev.booky.betterview.common.util.BypassedPacket;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -31,7 +31,7 @@ public class PacketHandler extends ChannelOutboundHandlerAdapter {
         }
         // unwrap packet
         if (msg instanceof BypassedPacket) {
-            msg = ((BypassedPacket) msg).getPacket();
+            msg = ((BypassedPacket) msg).packet();
         }
         // forward packet
         super.write(ctx, msg, promise);

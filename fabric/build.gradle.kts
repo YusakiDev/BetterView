@@ -1,6 +1,5 @@
 import net.fabricmc.loom.task.AbstractRemapJarTask
 import net.fabricmc.loom.task.RemapJarTask
-import org.gradle.kotlin.dsl.assign
 
 plugins {
     alias(libs.plugins.loom)

@@ -1,0 +1,84 @@
+package dev.booky.betterview;
+// Created by booky10 in BetterView (04:12 05.06.2025)
+
+import dev.booky.betterview.common.BvdManager;
+import dev.booky.betterview.common.hooks.BetterViewHook;
+import dev.booky.betterview.common.hooks.LevelHook;
+import dev.booky.betterview.common.hooks.PlayerHook;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
+import net.kyori.adventure.key.Key;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
+import java.lang.ref.WeakReference;
+import java.nio.file.Path;
+import java.util.UUID;
+
+@NullMarked
+public class BetterViewMod implements BetterViewHook, ModInitializer {
+
+    public static @MonotonicNonNull BetterViewMod INSTANCE = null;
+    public static @Nullable WeakReference<MinecraftServer> SERVER = null;
+
+    private final BvdManager manager;
+
+    private BetterViewMod() {
+        if (INSTANCE != null) {
+            throw new IllegalStateException("Mod has already been constructed");
+        }
+        INSTANCE = this;
+
+        Path configPath = FabricLoader.getInstance().getConfigDir().resolve("betterview.yml");
+        this.manager = new BvdManager(__ -> this, configPath);
+    }
+
+    public static MinecraftServer getServer() {
+        MinecraftServer server;
+        if (SERVER == null || (server = SERVER.get()) == null) {
+            throw new IllegalStateException("No MinecraftServer instance is currently running");
+        }
+        return server;
+    }
+
+    @Override
+    public void onInitialize() {
+        // NO-OP
+    }
+
+    @Override
+    public long getNanosPerServerTick() {
+        return getServer().tickRateManager().nanosecondsPerTick();
+    }
+
+    @Override
+    public LevelHook constructLevel(Key worldName) {
+        ResourceKey<Level> levelKey = ResourceKey.create(Registries.DIMENSION, (ResourceLocation) worldName);
+        ServerLevel level = getServer().getLevel(levelKey);
+        if (level == null) {
+            throw new IllegalArgumentException("Can't find level with name " + worldName);
+        }
+        return (LevelHook) level;
+    }
+
+    @Override
+    public PlayerHook constructPlayer(UUID playerId) {
+        ServerPlayer player = getServer().getPlayerList().getPlayer(playerId);
+        if (player == null) {
+            throw new IllegalArgumentException("Can't find player with id " + playerId);
+        }
+        return (PlayerHook) player;
+    }
+
+    public BvdManager getManager() {
+        return this.manager;
+    }
+}

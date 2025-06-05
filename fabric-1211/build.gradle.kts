@@ -1,6 +1,4 @@
 import net.fabricmc.loom.task.AbstractRemapJarTask
-import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.withType
 
 plugins {
     alias(libs.plugins.loom)
@@ -10,9 +8,20 @@ dependencies {
     minecraft(libs.minecraft.v1211)
     mappings(loom.layered {
         officialMojangMappings()
-        parchment(variantOf(libs.parchment.v1221) { artifactType("zip") })
+        parchment(variantOf(libs.parchment.v1211) { artifactType("zip") })
     })
     modImplementation(libs.fabric.loader)
+
+    // common project setup
+    api(projects.common) {
+        exclude(group = "net.kyori")
+    }
+
+    // adventure platform for better integration with everything
+    modImplementation(libs.adventure.platform.fabric.v1211)
+
+    // depend on moonrise for chunk loading stuff
+    modApi(libs.moonrise.v1211)
 }
 
 tasks.named<ProcessResources>("processResources") {
@@ -27,5 +36,6 @@ tasks.withType<AbstractRemapJarTask> {
 }
 
 loom {
+    accessWidenerPath = file("src/main/resources/betterview.accesswidener")
     mixin.defaultRefmapName = "${rootProject.name}-${project.name}-refmap.json".lowercase()
 }
