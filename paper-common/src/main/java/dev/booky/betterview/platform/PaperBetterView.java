@@ -28,9 +28,10 @@ public class PaperBetterView implements BetterViewHook {
         return PaperNmsInterface.SERVICE.getNanosPerServerTick();
     }
 
+    @SuppressWarnings("PatternValidation")
     @Override
-    public LevelHook constructLevel(Key worldName) {
-        World world = Bukkit.getWorld(worldName);
+    public LevelHook constructLevel(String worldName) {
+        World world = Bukkit.getWorld(Key.key(worldName));
         if (world == null) {
             throw new IllegalStateException("Can't find level with name " + worldName);
         }

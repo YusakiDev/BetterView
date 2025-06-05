@@ -44,7 +44,7 @@ public final class BvdManager {
     private final AtomicInteger generatedChunks = new AtomicInteger(0);
     private final BetterViewHook hook;
 
-    private final Map<Key, LevelHook> levels = new HashMap<>();
+    private final Map<String, LevelHook> levels = new HashMap<>();
     private final Map<UUID, PlayerHook> players = new HashMap<>();
 
     private final Path configPath;
@@ -164,11 +164,11 @@ public final class BvdManager {
     }
 
     public LevelHook getLevel(Key worldName) {
-        return this.levels.computeIfAbsent(worldName, this.hook::constructLevel);
+        return this.levels.computeIfAbsent(worldName.asString(), this.hook::constructLevel);
     }
 
     public void unregisterLevel(Key worldName) {
-        this.levels.remove(worldName);
+        this.levels.remove(worldName.asString());
     }
 
     public PlayerHook getPlayer(UUID playerId) {
