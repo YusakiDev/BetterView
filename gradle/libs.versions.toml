@@ -19,6 +19,7 @@ adventure = "4.21.0"
 # paper
 paper-base = "1.21.1-R0.1-SNAPSHOT"
 paper-v1211 = "1.21.1-R0.1-SNAPSHOT"
+paper-v1213 = "1.21.3-R0.1-SNAPSHOT"
 
 # fabric
 fabric-loader = "0.16.14"

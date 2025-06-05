@@ -6,7 +6,7 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public class BypassedPacket {
 
-    private Object packet;
+    private final Object packet;
 
     public BypassedPacket(Object packet) {
         this.packet = packet;
