@@ -35,6 +35,10 @@ minecraft-v1213 = "1.21.3"
 parchment-v1213 = "2024.12.07"
 moonrise-v1213 = "LMdPX7nZ" # https://modrinth.com/mod/moonrise-opt/version/LMdPX7nZ
 adventure-platform-fabric-v1213 = "6.2.0"
+minecraft-v1214 = "1.21.4"
+parchment-v1214 = "2025.03.23"
+moonrise-v1214 = "6Dgh9jQx" # https://modrinth.com/mod/moonrise-opt/version/6Dgh9jQx
+adventure-platform-fabric-v1214 = "6.3.0"
 
 [plugins]
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
@@ -70,3 +74,7 @@ minecraft-v1213 = { module = "com.mojang:minecraft", version.ref = "minecraft-v1
 parchment-v1213 = { module = "org.parchmentmc.data:parchment-1.21.3", version.ref = "parchment-v1213" }
 moonrise-v1213 = { module = "maven.modrinth:moonrise-opt", version.ref = "moonrise-v1213" }
 adventure-platform-fabric-v1213 = { module = "net.kyori:adventure-platform-fabric", version.ref = "adventure-platform-fabric-v1213" }
+minecraft-v1214 = { module = "com.mojang:minecraft", version.ref = "minecraft-v1214" }
+parchment-v1214 = { module = "org.parchmentmc.data:parchment-1.21.4", version.ref = "parchment-v1214" }
+moonrise-v1214 = { module = "maven.modrinth:moonrise-opt", version.ref = "moonrise-v1214" }
+adventure-platform-fabric-v1214 = { module = "net.kyori:adventure-platform-fabric", version.ref = "adventure-platform-fabric-v1214" }
