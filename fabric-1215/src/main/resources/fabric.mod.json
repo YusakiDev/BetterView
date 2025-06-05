@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "betterview-mc1215",
+  "version": "${version}",
+  "name": "BetterView 1.21.5",
+
+  "icon": "assets/betterview/icon.png",
+  "description": "Implements asynchronous lightweight view distance for 1.21.5",
+  "authors": [
+    "booky10"
+  ],
+
+  "license": "GPL-3.0-only",
+  "environment": "*",
+  "accessWidener": "betterview.accesswidener",
+
+  "entrypoints": {
+    "main": [
+      "dev.booky.betterview.fabric.v1215.BetterViewMod"
+    ]
+  },
+  "mixins": [
+    "betterview.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "1.21.5",
+    "java": ">=21",
+    "moonrise": "*",
+    "betterview-common": "*"
+  },
+
+  "custom": {
+    "modmenu": {
+      "parent": "betterview"
+    }
+  }
+}
