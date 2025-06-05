@@ -1,7 +1,7 @@
 package dev.booky.betterview.nms.v1213;
 // Created by booky10 in BetterView (16:37 03.06.2025)
 
-import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor;
+import ca.spottedleaf.concurrentutil.util.Priority;
 import ca.spottedleaf.moonrise.common.util.ChunkSystem;
 import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder;
 import dev.booky.betterview.common.BvdManager;
@@ -43,15 +43,15 @@ import java.util.concurrent.CompletableFuture;
 public class NmsAdapter implements PaperNmsInterface {
 
     // magic packet id values
-    static final byte FORGET_LEVEL_CHUNK_PACKET_ID = 0x21;
+    static final byte FORGET_LEVEL_CHUNK_PACKET_ID = 0x22;
     static final ByteBuf FORGET_LEVEL_CHUNK_PACKET_ID_BUF =
             Unpooled.wrappedBuffer(new byte[]{FORGET_LEVEL_CHUNK_PACKET_ID});
-    static final byte LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = 0x27;
+    static final byte LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = 0x28;
     static final ByteBuf LEVEL_CHUNK_WITH_LIGHT_PACKET_ID_BUF =
             Unpooled.wrappedBuffer(new byte[]{LEVEL_CHUNK_WITH_LIGHT_PACKET_ID});
 
     public NmsAdapter() {
-        if (SharedConstants.getProtocolVersion() != 767) {
+        if (SharedConstants.getProtocolVersion() != 768) {
             throw new UnsupportedOperationException();
         }
     }
@@ -125,7 +125,7 @@ public class NmsAdapter implements PaperNmsInterface {
     public CompletableFuture<ByteBuf> loadChunk(World world, int chunkX, int chunkZ) {
         CompletableFuture<ByteBuf> future = new CompletableFuture<>();
         ServerLevel level = ((CraftWorld) world).getHandle();
-        ChunkSystem.scheduleChunkLoad(level, chunkX, chunkZ, true, ChunkStatus.LIGHT, true, PrioritisedExecutor.Priority.LOW,
+        ChunkSystem.scheduleChunkLoad(level, chunkX, chunkZ, true, ChunkStatus.LIGHT, true, Priority.LOW,
                 chunk -> future.completeAsync(() -> ChunkWriter.writeFullOrEmpty(chunk)));
         return future;
     }
@@ -148,8 +148,8 @@ public class NmsAdapter implements PaperNmsInterface {
     @Override
     public ByteBuf buildEmptyChunkData(World world) {
         ServerLevel level = ((CraftWorld) world).getHandle();
-        Registry<Biome> biomeRegistry = level.registryAccess().registryOrThrow(Registries.BIOME);
-        Holder.Reference<Biome> biome = biomeRegistry.getHolderOrThrow(Biomes.THE_VOID);
+        Registry<Biome> biomeRegistry = level.registryAccess().lookupOrThrow(Registries.BIOME);
+        Holder.Reference<Biome> biome = biomeRegistry.getOrThrow(Biomes.THE_VOID);
         EmptyLevelChunk chunk = new EmptyLevelChunk(level, ChunkPos.ZERO, biome);
 
         ByteBuf buf = Unpooled.buffer();

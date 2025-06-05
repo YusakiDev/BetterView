@@ -26,6 +26,7 @@ tasks.withType<Jar> {
 }
 
 tasks.withType<ShadowJar> {
+    mergeServiceFiles()
     // final paper jar, place it in root build dir
     destinationDirectory = rootProject.layout.buildDirectory.dir("libs")
     archiveClassifier = ""
@@ -43,5 +44,5 @@ configure<BukkitPluginDescription> {
 }
 
 tasks.named<RunServer>("runServer") {
-    minecraftVersion(libs.versions.paper.base.get().split("-")[0])
+    minecraftVersion("1.21.3")
 }
