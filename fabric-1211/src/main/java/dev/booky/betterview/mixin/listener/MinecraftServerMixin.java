@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.lang.ref.WeakReference;
 import java.util.Set;
 
 @NullMarked
@@ -28,15 +27,7 @@ public abstract class MinecraftServerMixin {
             at = @At("TAIL")
     )
     private void postInit(CallbackInfo ci) {
-        BetterViewMod.SERVER = new WeakReference<>((MinecraftServer) (Object) this);
-    }
-
-    @Inject(
-            method = "tickChildren",
-            at = @At("TAIL")
-    )
-    private void postServerTick(CallbackInfo ci) {
-        BetterViewMod.INSTANCE.getManager().runTick();
+        BetterViewMod.INSTANCE.triggerPreLoad((MinecraftServer) (Object) this);
     }
 
     @Inject(
@@ -50,5 +41,26 @@ public abstract class MinecraftServerMixin {
     )
     private void postServerInit(CallbackInfo ci) {
         BetterViewMod.INSTANCE.triggerPostLoad(this.levelKeys());
+    }
+
+    @Inject(
+            method = "tickChildren",
+            at = @At("TAIL")
+    )
+    private void postServerTick(CallbackInfo ci) {
+        BetterViewMod.INSTANCE.getManager().runTick();
+    }
+
+    @Inject(
+            method = "stopServer",
+            at = @At(
+                    // inject after players have been disconnected
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/network/ServerConnectionListener;stop()V",
+                    shift = At.Shift.AFTER
+            )
+    )
+    private void onShutdown(CallbackInfo ci) {
+        BetterViewMod.INSTANCE.triggerShutdown();
     }
 }

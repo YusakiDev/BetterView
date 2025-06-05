@@ -28,26 +28,15 @@ import java.util.UUID;
 public class BetterViewMod implements BetterViewHook, ModInitializer {
 
     public static @MonotonicNonNull BetterViewMod INSTANCE = null;
-    public static @Nullable WeakReference<MinecraftServer> SERVER = null;
 
-    private final BvdManager manager;
+    private @Nullable WeakReference<MinecraftServer> server = null;
+    private @Nullable BvdManager manager;
 
     private BetterViewMod() {
         if (INSTANCE != null) {
             throw new IllegalStateException("Mod has already been constructed");
         }
         INSTANCE = this;
-
-        Path configPath = FabricLoader.getInstance().getConfigDir().resolve("betterview.yml");
-        this.manager = new BvdManager(__ -> this, configPath);
-    }
-
-    public static MinecraftServer getServer() {
-        MinecraftServer server;
-        if (SERVER == null || (server = SERVER.get()) == null) {
-            throw new IllegalStateException("No MinecraftServer instance is currently running");
-        }
-        return server;
     }
 
     @Override
@@ -55,25 +44,47 @@ public class BetterViewMod implements BetterViewHook, ModInitializer {
         // NO-OP
     }
 
+    public void triggerPreLoad(MinecraftServer server) {
+        // save server instance
+        this.server = new WeakReference<>(server);
+        // initialize bvd manager
+        Path configPath = FabricLoader.getInstance().getConfigDir().resolve("betterview.yml");
+        this.manager = new BvdManager(__ -> this, configPath);
+    }
+
     public void triggerPostLoad(Set<ResourceKey<Level>> levelKeys) {
+        BvdManager manager = this.getManager();
         // eagerly load all available dimensions once on startup to allow
         // population of config file - every other dimension gets lazy loaded
         for (ResourceKey<Level> levelKey : levelKeys) {
-            this.manager.getConfig(levelKey.location());
+            manager.getConfig(levelKey.location());
         }
         // call post-load action
-        this.manager.onPostLoad();
+        manager.onPostLoad();
+    }
+
+    public void triggerShutdown() {
+        this.server = null;
+        this.manager = null;
+    }
+
+    private MinecraftServer getServer() {
+        MinecraftServer server;
+        if (this.server == null || (server = this.server.get()) == null) {
+            throw new IllegalStateException("No MinecraftServer instance is currently running");
+        }
+        return server;
     }
 
     @Override
     public long getNanosPerServerTick() {
-        return getServer().tickRateManager().nanosecondsPerTick();
+        return this.getServer().tickRateManager().nanosecondsPerTick();
     }
 
     @Override
     public LevelHook constructLevel(Key worldName) {
         ResourceKey<Level> levelKey = ResourceKey.create(Registries.DIMENSION, (ResourceLocation) worldName);
-        ServerLevel level = getServer().getLevel(levelKey);
+        ServerLevel level = this.getServer().getLevel(levelKey);
         if (level == null) {
             throw new IllegalArgumentException("Can't find level with name " + worldName);
         }
@@ -82,7 +93,7 @@ public class BetterViewMod implements BetterViewHook, ModInitializer {
 
     @Override
     public PlayerHook constructPlayer(UUID playerId) {
-        ServerPlayer player = getServer().getPlayerList().getPlayer(playerId);
+        ServerPlayer player = this.getServer().getPlayerList().getPlayer(playerId);
         if (player == null) {
             throw new IllegalArgumentException("Can't find player with id " + playerId);
         }
@@ -90,6 +101,9 @@ public class BetterViewMod implements BetterViewHook, ModInitializer {
     }
 
     public BvdManager getManager() {
+        if (this.manager == null) {
+            throw new IllegalStateException("Manager not loaded");
+        }
         return this.manager;
     }
 }
