@@ -24,4 +24,6 @@ public interface PlayerHook {
     Channel getNettyChannel();
 
     BvdPlayer getBvdPlayer();
+
+    boolean isValid();
 }

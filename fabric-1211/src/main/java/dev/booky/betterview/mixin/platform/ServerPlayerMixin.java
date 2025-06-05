@@ -54,6 +54,9 @@ public abstract class ServerPlayerMixin extends Player {
     @Shadow
     public abstract int requestedViewDistance();
 
+    @Shadow
+    public abstract boolean hasDisconnected();
+
     @Inject(
             method = "<init>",
             at = @At("TAIL")
@@ -107,5 +110,9 @@ public abstract class ServerPlayerMixin extends Player {
 
     public BvdPlayer betterview$getBvdPlayer() {
         return this.bvdPlayer;
+    }
+
+    public boolean betterview$isValid() {
+        return !this.hasDisconnected() && this.isAlive();
     }
 }

@@ -368,7 +368,8 @@ public final class BvdPlayer {
     public boolean preTick() {
         int clientDistance = this.getClientViewDistance();
         if (this.enabled) {
-            if (this.distance == clientDistance) {
+            boolean valid = this.player.isValid();
+            if (this.distance == clientDistance && valid) {
                 return true; // continue processing as normal
             }
             if (!this.canBeActivated(clientDistance)) {
@@ -376,6 +377,9 @@ public final class BvdPlayer {
                 this.unloadBvdChunks();
                 this.disable();
                 return false;
+            }
+            if (!valid) {
+                return false; // don't disable, just stop processing for now
             }
             // update distance
             this.updateDistance(clientDistance);
