@@ -7,7 +7,6 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -15,15 +14,16 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 @NullMarked
 public class PacketUtil {
 
     // magic packet id values
-    public static final byte FORGET_LEVEL_CHUNK_PACKET_ID = 0x22;
+    public static final byte FORGET_LEVEL_CHUNK_PACKET_ID = 0x21;
     public static final ByteBuf FORGET_LEVEL_CHUNK_PACKET_ID_BUF =
             Unpooled.wrappedBuffer(new byte[]{FORGET_LEVEL_CHUNK_PACKET_ID});
-    public static final byte LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = 0x28;
+    public static final byte LEVEL_CHUNK_WITH_LIGHT_PACKET_ID = 0x27;
     public static final ByteBuf LEVEL_CHUNK_WITH_LIGHT_PACKET_ID_BUF =
             Unpooled.wrappedBuffer(new byte[]{LEVEL_CHUNK_WITH_LIGHT_PACKET_ID});
 
@@ -37,10 +37,10 @@ public class PacketUtil {
 
         ByteBuf buf = Unpooled.buffer();
         try {
-            CompoundTag heightmapTags = ChunkWriter.extractHeightmapTags(chunk);
+            long[]@Nullable[] heightmapsData = ChunkWriter.extractHeightmapsData(chunk);
             byte[][] blockLight = LightWriter.convertStarlightToBytes(((StarlightChunk) chunk).starlight$getBlockNibbles(), false);
             byte[][] skyLight = LightWriter.convertStarlightToBytes(((StarlightChunk) chunk).starlight$getSkyNibbles(), true);
-            ChunkWriter.writeFullBody(buf, heightmapTags, chunk.getSections(), blockLight, skyLight);
+            ChunkWriter.writeFullBody(buf, heightmapsData, chunk.getSections(), blockLight, skyLight);
             return buf.retain();
         } finally {
             buf.release();

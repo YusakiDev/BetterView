@@ -35,7 +35,7 @@ dependencies {
         .forEach { include(it) }
 
     // version-specific runtime mods
-    runtimeMods(libs.moonrise.v1214)
+    runtimeMods(libs.moonrise.v1215)
 }
 
 tasks.named<ProcessResources>("processResources") {
@@ -80,7 +80,7 @@ abstract class CustomServerProductionRunTask : ServerProductionRunTask {
 }
 
 tasks.register<CustomServerProductionRunTask>("prodServer") {
-    minecraftVersion = "1.21.4"
+    minecraftVersion = "1.21.5"
     loaderVersion = libs.versions.fabric.loader
     javaLauncher = javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(21)
