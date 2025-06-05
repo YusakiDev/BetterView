@@ -56,7 +56,7 @@ public abstract class MinecraftServerMixin {
             at = @At(
                     // inject after players have been disconnected
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/network/ServerConnectionListener;stop()V",
+                    target = "Lnet/minecraft/server/players/PlayerList;removeAll()V",
                     shift = At.Shift.AFTER
             )
     )
