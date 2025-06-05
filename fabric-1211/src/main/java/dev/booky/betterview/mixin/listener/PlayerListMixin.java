@@ -54,18 +54,18 @@ public class PlayerListMixin {
 
     @Inject(
             method = "respawn",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
-                    shift = At.Shift.AFTER,
-                    remap = false
-            )
+            at = @At("RETURN")
     )
-    private void postPlayerRespawn(CallbackInfoReturnable<ServerPlayer> ci, @Local(ordinal = 1) ServerPlayer player) {
+    private void postPlayerRespawn(CallbackInfoReturnable<ServerPlayer> ci) {
+        ServerPlayer player = ci.getReturnValue();
+
         // unregister player with this uuid and register again to handle respawning
         BvdManager manager = BetterViewMod.INSTANCE.getManager();
         manager.unregisterPlayer(player.getUUID());
         manager.getPlayer(player.getUUID()); // load new player instance
+
+        // replace player hook in bvd player (which was transferred from the previous player)
+        ((PlayerHook) player).getBvdPlayer().replacePlayer((PlayerHook) player);
     }
 
     @Inject(

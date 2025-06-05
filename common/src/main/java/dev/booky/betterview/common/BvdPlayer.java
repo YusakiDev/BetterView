@@ -45,7 +45,7 @@ public final class BvdPlayer {
     // how the vanilla client handles storing chunks
     public ChunkState[] chunkStates = EMPTY_CHUNK_STATE_ARRAY;
 
-    public final PlayerHook player;
+    public PlayerHook player;
     public LevelHook level;
     public McChunkPos chunkPos;
 
@@ -74,6 +74,10 @@ public final class BvdPlayer {
     private boolean canStore(int chunkX, int chunkZ) {
         return Math.abs(chunkX - this.chunkPos.getX()) <= this.storageRadius
                 && Math.abs(chunkZ - this.chunkPos.getZ()) <= this.storageRadius;
+    }
+
+    public void replacePlayer(PlayerHook player) {
+        this.player = player;
     }
 
     private boolean canBeActivated(int clientDistance) {

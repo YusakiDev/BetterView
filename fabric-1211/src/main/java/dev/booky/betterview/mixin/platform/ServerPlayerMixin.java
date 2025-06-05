@@ -62,6 +62,14 @@ public abstract class ServerPlayerMixin extends Player {
         this.bvdPlayer = new BvdPlayer((PlayerHook) this);
     }
 
+    @Inject(
+            method = "restoreFrom",
+            at = @At("TAIL")
+    )
+    private void onDeathRestore(ServerPlayer from, boolean keepInventory, CallbackInfo ci) {
+        this.bvdPlayer = ((PlayerHook) from).getBvdPlayer();
+    }
+
     public LevelHook betterview$getLevel() {
         return (LevelHook) this.serverLevel();
     }
