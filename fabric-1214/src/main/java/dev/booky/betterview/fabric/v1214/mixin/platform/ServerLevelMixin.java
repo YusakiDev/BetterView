@@ -1,7 +1,7 @@
 package dev.booky.betterview.fabric.v1214.mixin.platform;
 // Created by booky10 in BetterView (04:24 05.06.2025)
 
-import ca.spottedleaf.moonrise.common.util.ChunkSystem;
+import ca.spottedleaf.moonrise.common.PlatformHooks;
 import ca.spottedleaf.moonrise.libs.ca.spottedleaf.concurrentutil.util.Priority;
 import ca.spottedleaf.moonrise.patches.chunk_system.level.ChunkSystemServerLevel;
 import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder;
@@ -106,7 +106,7 @@ public abstract class ServerLevelMixin extends Level implements WorldGenLevel {
 
     public CompletableFuture<ByteBuf> betterview$loadChunk(int chunkX, int chunkZ) {
         CompletableFuture<ByteBuf> future = new CompletableFuture<>();
-        ChunkSystem.scheduleChunkLoad((ServerLevel) (Object) this, chunkX, chunkZ, true,
+        PlatformHooks.get().scheduleChunkLoad((ServerLevel) (Object) this, chunkX, chunkZ, true,
                 ChunkStatus.LIGHT, true, Priority.LOW,
                 chunk -> future.completeAsync(() -> ChunkWriter.writeFullOrEmpty(chunk)));
         return future;

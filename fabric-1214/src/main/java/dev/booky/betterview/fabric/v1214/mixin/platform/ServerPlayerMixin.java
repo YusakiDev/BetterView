@@ -1,7 +1,7 @@
 package dev.booky.betterview.fabric.v1214.mixin.platform;
 // Created by booky10 in BetterView (04:00 05.06.2025)
 
-import ca.spottedleaf.moonrise.common.util.ChunkSystem;
+import ca.spottedleaf.moonrise.common.PlatformHooks;
 import com.mojang.authlib.GameProfile;
 import dev.booky.betterview.common.BvdPlayer;
 import dev.booky.betterview.common.hooks.LevelHook;
@@ -83,7 +83,7 @@ public abstract class ServerPlayerMixin extends Player {
     }
 
     public int betterview$getSendViewDistance() {
-        return ChunkSystem.getSendViewDistance((ServerPlayer) (Object) this);
+        return PlatformHooks.get().getSendViewDistance((ServerPlayer) (Object) this);
     }
 
     public int betterview$getRequestedViewDistance() {

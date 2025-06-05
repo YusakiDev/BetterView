@@ -19,9 +19,6 @@ dependencies {
     modImplementation(libs.adventure.platform.fabric.v1214)
     include(libs.adventure.platform.fabric.v1214)
 
-    // update kyori option library as adventure platform includes a version too old for configurate to work
-    include(libs.option)
-
     // depend on moonrise for chunk loading stuff
     modApi(libs.moonrise.v1214)
 }
