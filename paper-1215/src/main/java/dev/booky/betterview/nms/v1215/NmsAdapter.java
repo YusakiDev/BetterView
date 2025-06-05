@@ -50,7 +50,8 @@ public class NmsAdapter implements PaperNmsInterface {
             Unpooled.wrappedBuffer(new byte[]{LEVEL_CHUNK_WITH_LIGHT_PACKET_ID});
 
     public NmsAdapter() {
-        if (SharedConstants.getProtocolVersion() != 770) {
+        if (SharedConstants.getProtocolVersion() != 770
+                && SharedConstants.getProtocolVersion() != 771) {
             throw new UnsupportedOperationException();
         }
     }
