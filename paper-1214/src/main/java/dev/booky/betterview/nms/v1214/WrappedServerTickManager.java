@@ -28,6 +28,8 @@ public class WrappedServerTickManager extends ServerTickRateManager {
             ReflectionUtil.getField(ServerTickRateManager.class, long.class, 3);
     private static final VarHandle PREVIOUS_IS_FROZEN =
             ReflectionUtil.getField(ServerTickRateManager.class, boolean.class, 0);
+    private static final VarHandle SILENT =
+            ReflectionUtil.getField(ServerTickRateManager.class, boolean.class, 1);
 
     private final BvdManager manager;
     private final ServerTickRateManager delegate;
@@ -43,6 +45,7 @@ public class WrappedServerTickManager extends ServerTickRateManager {
         SPRINT_TIME_SPEND.set(this, SPRINT_TIME_SPEND.get(delegate));
         SCHEDULED_CURRENT_SPRINT_TICKS.set(this, SCHEDULED_CURRENT_SPRINT_TICKS.get(delegate));
         PREVIOUS_IS_FROZEN.set(this, PREVIOUS_IS_FROZEN.get(delegate));
+        SILENT.set(this, SILENT.get(delegate));
     }
 
     public static void inject(MinecraftServer server, BvdManager manager) {

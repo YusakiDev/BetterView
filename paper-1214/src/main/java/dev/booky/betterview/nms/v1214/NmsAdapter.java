@@ -2,7 +2,7 @@ package dev.booky.betterview.nms.v1214;
 // Created by booky10 in BetterView (16:37 03.06.2025)
 
 import ca.spottedleaf.concurrentutil.util.Priority;
-import ca.spottedleaf.moonrise.common.util.ChunkSystem;
+import ca.spottedleaf.moonrise.common.PlatformHooks;
 import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder;
 import dev.booky.betterview.common.BvdManager;
 import dev.booky.betterview.common.BvdPlayer;
@@ -51,7 +51,7 @@ public class NmsAdapter implements PaperNmsInterface {
             Unpooled.wrappedBuffer(new byte[]{LEVEL_CHUNK_WITH_LIGHT_PACKET_ID});
 
     public NmsAdapter() {
-        if (SharedConstants.getProtocolVersion() != 768) {
+        if (SharedConstants.getProtocolVersion() != 769) {
             throw new UnsupportedOperationException();
         }
     }
@@ -125,7 +125,7 @@ public class NmsAdapter implements PaperNmsInterface {
     public CompletableFuture<ByteBuf> loadChunk(World world, int chunkX, int chunkZ) {
         CompletableFuture<ByteBuf> future = new CompletableFuture<>();
         ServerLevel level = ((CraftWorld) world).getHandle();
-        ChunkSystem.scheduleChunkLoad(level, chunkX, chunkZ, true, ChunkStatus.LIGHT, true, Priority.LOW,
+        PlatformHooks.get().scheduleChunkLoad(level, chunkX, chunkZ, true, ChunkStatus.LIGHT, true, Priority.LOW,
                 chunk -> future.completeAsync(() -> ChunkWriter.writeFullOrEmpty(chunk)));
         return future;
     }
