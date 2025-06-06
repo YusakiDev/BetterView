@@ -21,6 +21,7 @@ public class BvConfig {
             .register(Key.class, KeySerializer.INSTANCE)
             .build();
 
+    private int configVersion = 1;
     private BvGlobalConfig global = new BvGlobalConfig();
     private Map<Key, BvLevelConfig> dimensions = new LinkedHashMap<>();
 
