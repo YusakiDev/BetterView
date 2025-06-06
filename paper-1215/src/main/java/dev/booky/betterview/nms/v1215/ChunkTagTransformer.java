@@ -5,7 +5,7 @@ import ca.spottedleaf.moonrise.common.util.WorldUtil;
 import ca.spottedleaf.moonrise.patches.starlight.util.SaveUtil;
 import com.destroystokyo.paper.util.SneakyThrow;
 import com.mojang.serialization.Codec;
-import dev.booky.betterview.common.util.ReflectionUtil;
+import dev.booky.betterview.nms.ReflectionUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.Holder;

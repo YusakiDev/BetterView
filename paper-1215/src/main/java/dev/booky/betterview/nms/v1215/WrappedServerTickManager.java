@@ -2,7 +2,7 @@ package dev.booky.betterview.nms.v1215;
 // Created by booky10 in BetterView (23:37 03.06.2025)
 
 import dev.booky.betterview.common.BvdManager;
-import dev.booky.betterview.common.util.ReflectionUtil;
+import dev.booky.betterview.nms.ReflectionUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerTickRateManager;
 import net.minecraft.server.level.ServerPlayer;

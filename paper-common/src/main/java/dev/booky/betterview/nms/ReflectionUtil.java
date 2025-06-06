@@ -1,4 +1,4 @@
-package dev.booky.betterview.common.util;
+package dev.booky.betterview.nms;
 // Created by booky10 in SimplePacketApi (22:27 15.05.23)
 
 import sun.misc.Unsafe;
