@@ -11,7 +11,7 @@
   },
 
   "icon": "assets/betterview/icon.png",
-  "description": "Extends the normal server view distance to extreme lengths",
+  "description": "Extends the normal server view distance without sacrificing server performance",
   "authors": [
     "booky10"
   ],

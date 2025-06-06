@@ -2,8 +2,9 @@
 
 ## Description
 
-BetterView is a paper plugin and fabric mod for Minecraft servers. It extends the normal view distance
-to extreme lengths using asynchronous player processing, chunk caching and direct chunk reading.
+BetterView is a high-performance Paper plugin and Fabric mod for Minecraft servers. It extends the normal view distance
+without sacrificing server performance using asynchronous player processing, direct chunk reading from disk, and
+caching of chunk data.
 
 ## Features
 
@@ -65,7 +66,8 @@ On the first start, this plugin will automatically create a configuration file. 
         - `cache-duration`: The cache duration for how long extended chunks should be kept in memory (default: `PT5M`,
           5 minutes)
 
-Feel free to play around with the chunk generations and chunk sending limits.
+Feel free to play around with the chunk generations and chunk sending limits for
+an optimal experience on your server setup.
 
 Make sure to adjust the cache duration based on what you use your server for;
 for e.g. static lobby servers, you can use a longer cache duration than for dynamic SMP servers.

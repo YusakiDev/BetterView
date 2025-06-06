@@ -5,7 +5,7 @@
   "name": "BetterView Common",
 
   "icon": "assets/betterview/icon.png",
-  "description": "Common logic for extending the normal server view distance to extreme lengths",
+  "description": "Common logic for extending the normal server view distance without sacrificing server performance",
   "authors": [
     "booky10"
   ],

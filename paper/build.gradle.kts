@@ -52,7 +52,7 @@ tasks.named("assemble") {
 configure<BukkitPluginDescription> {
     name = rootProject.name
     main = "${project.group}.BetterViewPlugin"
-    description = "Extends the normal server view distance to extreme lengths"
+    description = "Extends the normal server view distance without sacrificing server performance"
     authors = listOf("booky10")
     website = "https://minceraft.dev/betterview"
     apiVersion = "1.21.1"
