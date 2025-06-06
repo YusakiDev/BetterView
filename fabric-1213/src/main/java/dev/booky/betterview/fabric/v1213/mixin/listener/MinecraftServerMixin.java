@@ -5,19 +5,25 @@ import dev.booky.betterview.fabric.v1213.BetterViewMod;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.jspecify.annotations.NullMarked;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.nio.file.Path;
 import java.util.Set;
 
 @NullMarked
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
+
+    @Final @Shadow
+    protected LevelStorageSource.LevelStorageAccess storageSource;
 
     @Shadow
     public abstract Set<ResourceKey<Level>> levelKeys();
@@ -27,7 +33,8 @@ public abstract class MinecraftServerMixin {
             at = @At("TAIL")
     )
     private void postInit(CallbackInfo ci) {
-        BetterViewMod.INSTANCE.triggerPreLoad((MinecraftServer) (Object) this);
+        Path worldDir = this.storageSource.getLevelDirectory().path();
+        BetterViewMod.INSTANCE.triggerPreLoad((MinecraftServer) (Object) this, worldDir);
     }
 
     @Inject(

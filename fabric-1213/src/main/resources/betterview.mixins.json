@@ -15,5 +15,8 @@
     "listener.RegionizedPlayerChunkLoaderMixin",
     "platform.ServerLevelMixin",
     "platform.ServerPlayerMixin"
+  ],
+  "client": [
+    "listener.IntegratedServerMixin"
   ]
 }

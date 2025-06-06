@@ -2,9 +2,9 @@ package dev.booky.betterview.fabric.v1215.mixin.listener;
 // Created by booky10 in BetterView (04:52 05.06.2025)
 
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.booky.betterview.fabric.v1215.BetterViewMod;
 import dev.booky.betterview.common.BvdManager;
 import dev.booky.betterview.common.hooks.PlayerHook;
+import dev.booky.betterview.fabric.v1215.BetterViewMod;
 import dev.booky.betterview.fabric.v1215.packet.PacketHandler;
 import io.netty.channel.ChannelHandler;
 import net.minecraft.network.Connection;
