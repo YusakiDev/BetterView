@@ -3,7 +3,7 @@ package dev.booky.betterview.common.util;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import dev.booky.betterview.common.BvdCacheEntry;
+import dev.booky.betterview.common.ChunkCacheEntry;
 import dev.booky.betterview.common.hooks.LevelHook;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -18,15 +18,15 @@ public final class BetterViewUtil {
     private BetterViewUtil() {
     }
 
-    public static LoadingCache<McChunkPos, BvdCacheEntry> buildCache(LevelHook level) {
+    public static LoadingCache<McChunkPos, ChunkCacheEntry> buildCache(LevelHook level) {
         return Caffeine.newBuilder()
                 .expireAfterWrite(level.getConfig().getCacheDuration())
-                .<McChunkPos, BvdCacheEntry>removalListener((key, val, cause) -> {
+                .<McChunkPos, ChunkCacheEntry>removalListener((key, val, cause) -> {
                     if (val != null) {
                         val.release();
                     }
                 })
-                .build(pos -> new BvdCacheEntry(level, pos));
+                .build(pos -> new ChunkCacheEntry(level, pos));
     }
 
     public static boolean isWithinRange(int posX, int posZ, int viewDistance) {

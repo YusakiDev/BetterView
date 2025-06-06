@@ -37,7 +37,7 @@ public class PacketUtil {
 
         ByteBuf buf = Unpooled.buffer();
         try {
-            long[]@Nullable[] heightmapsData = ChunkWriter.extractHeightmapsData(chunk);
+            long[] @Nullable [] heightmapsData = ChunkWriter.extractHeightmapsData(chunk);
             byte[][] blockLight = LightWriter.convertStarlightToBytes(((StarlightChunk) chunk).starlight$getBlockNibbles(), false);
             byte[][] skyLight = LightWriter.convertStarlightToBytes(((StarlightChunk) chunk).starlight$getSkyNibbles(), true);
             ChunkWriter.writeFullBody(buf, heightmapsData, chunk.getSections(), blockLight, skyLight);

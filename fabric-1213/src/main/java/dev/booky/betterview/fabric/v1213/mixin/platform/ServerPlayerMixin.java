@@ -3,7 +3,7 @@ package dev.booky.betterview.fabric.v1213.mixin.platform;
 
 import ca.spottedleaf.moonrise.common.util.ChunkSystem;
 import com.mojang.authlib.GameProfile;
-import dev.booky.betterview.common.BvdPlayer;
+import dev.booky.betterview.common.BetterViewPlayer;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.hooks.PlayerHook;
 import dev.booky.betterview.common.util.BetterViewUtil;
@@ -42,7 +42,7 @@ public abstract class ServerPlayerMixin extends Player {
     public ServerGamePacketListenerImpl connection;
 
     @Unique
-    private @MonotonicNonNull BvdPlayer bvdPlayer;
+    private @MonotonicNonNull BetterViewPlayer bvPlayer;
 
     public ServerPlayerMixin(Level level, BlockPos pos, float yRot, GameProfile gameProfile) {
         super(level, pos, yRot, gameProfile); // dummy ctor
@@ -62,7 +62,7 @@ public abstract class ServerPlayerMixin extends Player {
             at = @At("TAIL")
     )
     private void postInit(CallbackInfo ci) {
-        this.bvdPlayer = new BvdPlayer((PlayerHook) this);
+        this.bvPlayer = new BetterViewPlayer((PlayerHook) this);
     }
 
     @Inject(
@@ -70,7 +70,7 @@ public abstract class ServerPlayerMixin extends Player {
             at = @At("TAIL")
     )
     private void onDeathRestore(ServerPlayer from, boolean keepInventory, CallbackInfo ci) {
-        this.bvdPlayer = ((PlayerHook) from).getBvdPlayer();
+        this.bvPlayer = ((PlayerHook) from).getBvPlayer();
     }
 
     public LevelHook betterview$getLevel() {
@@ -108,8 +108,8 @@ public abstract class ServerPlayerMixin extends Player {
         return this.connection.connection.channel;
     }
 
-    public BvdPlayer betterview$getBvdPlayer() {
-        return this.bvdPlayer;
+    public BetterViewPlayer betterview$getBvPlayer() {
+        return this.bvPlayer;
     }
 
     public boolean betterview$isValid() {

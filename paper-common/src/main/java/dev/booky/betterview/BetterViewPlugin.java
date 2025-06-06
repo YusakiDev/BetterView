@@ -1,7 +1,7 @@
 package dev.booky.betterview;
 // Created by booky10 in BetterView (15:40 03.06.2025)
 
-import dev.booky.betterview.common.BvdManager;
+import dev.booky.betterview.common.BetterViewManager;
 import dev.booky.betterview.listener.LevelListener;
 import dev.booky.betterview.listener.PlayerListener;
 import dev.booky.betterview.listener.TickListener;
@@ -19,12 +19,12 @@ import java.nio.file.Path;
 @NullMarked
 public class BetterViewPlugin extends JavaPlugin {
 
-    private final BvdManager manager;
+    private final BetterViewManager manager;
     private @MonotonicNonNull NamespacedKey listenerKey;
 
     public BetterViewPlugin() {
         Path configPath = this.getDataPath().resolve("config.yml");
-        this.manager = new BvdManager(PaperBetterView::new, configPath);
+        this.manager = new BetterViewManager(PaperBetterView::new, configPath);
     }
 
     @Override

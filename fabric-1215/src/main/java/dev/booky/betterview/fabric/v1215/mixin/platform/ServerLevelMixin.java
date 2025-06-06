@@ -6,7 +6,7 @@ import ca.spottedleaf.moonrise.libs.ca.spottedleaf.concurrentutil.util.Priority;
 import ca.spottedleaf.moonrise.patches.chunk_system.level.ChunkSystemServerLevel;
 import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import dev.booky.betterview.common.BvdCacheEntry;
+import dev.booky.betterview.common.ChunkCacheEntry;
 import dev.booky.betterview.common.config.BvLevelConfig;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.util.BetterViewUtil;
@@ -56,7 +56,7 @@ public abstract class ServerLevelMixin extends Level implements WorldGenLevel {
     private ServerChunkCache chunkSource;
 
     @Unique
-    private @MonotonicNonNull LoadingCache<McChunkPos, BvdCacheEntry> cache;
+    private @MonotonicNonNull LoadingCache<McChunkPos, ChunkCacheEntry> cache;
     @Unique
     private boolean voidWorld;
     @Unique
@@ -143,7 +143,7 @@ public abstract class ServerLevelMixin extends Level implements WorldGenLevel {
         return BetterViewMod.INSTANCE.getManager().getConfig(this.dimension().location());
     }
 
-    public LoadingCache<McChunkPos, BvdCacheEntry> betterview$getBvdCache() {
+    public LoadingCache<McChunkPos, ChunkCacheEntry> betterview$getChunkCache() {
         return this.cache;
     }
 

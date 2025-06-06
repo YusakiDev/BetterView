@@ -14,14 +14,14 @@ import java.util.concurrent.CompletableFuture;
 // wrap cache value to allow dynamic "invalidation", as the validity of this cache entry
 // is only known after asynchronously building the chunk byte buffer
 @NullMarked
-public final class BvdCacheEntry {
+public final class ChunkCacheEntry {
 
     private final LevelHook level;
     private final McChunkPos pos;
 
     private volatile @Nullable CompletableFuture<@Nullable ByteBuf> future;
 
-    public BvdCacheEntry(LevelHook level, McChunkPos pos) {
+    public ChunkCacheEntry(LevelHook level, McChunkPos pos) {
         this.level = level;
         this.pos = pos;
     }

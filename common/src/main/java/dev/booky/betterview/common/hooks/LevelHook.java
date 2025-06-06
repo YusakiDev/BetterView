@@ -2,7 +2,7 @@ package dev.booky.betterview.common.hooks;
 // Created by booky10 in BetterView (14:08 03.06.2025)
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import dev.booky.betterview.common.BvdCacheEntry;
+import dev.booky.betterview.common.ChunkCacheEntry;
 import dev.booky.betterview.common.config.BvLevelConfig;
 import dev.booky.betterview.common.util.ChunkTagResult;
 import dev.booky.betterview.common.util.McChunkPos;
@@ -34,7 +34,7 @@ public interface LevelHook {
 
     BvLevelConfig getConfig();
 
-    LoadingCache<McChunkPos, BvdCacheEntry> getBvdCache();
+    LoadingCache<McChunkPos, ChunkCacheEntry> getChunkCache();
 
     Key getName();
 }

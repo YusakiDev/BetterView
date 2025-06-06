@@ -1,7 +1,7 @@
 package dev.booky.betterview.fabric.v1214;
 // Created by booky10 in BetterView (04:12 05.06.2025)
 
-import dev.booky.betterview.common.BvdManager;
+import dev.booky.betterview.common.BetterViewManager;
 import dev.booky.betterview.common.hooks.BetterViewHook;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.hooks.PlayerHook;
@@ -28,7 +28,7 @@ public class BetterViewMod implements BetterViewHook, ModInitializer {
     public static @MonotonicNonNull BetterViewMod INSTANCE = null;
 
     private @Nullable WeakReference<MinecraftServer> server = null;
-    private @Nullable BvdManager manager;
+    private @Nullable BetterViewManager manager;
 
     public BetterViewMod() {
         if (INSTANCE != null) {
@@ -45,13 +45,13 @@ public class BetterViewMod implements BetterViewHook, ModInitializer {
     public void triggerPreLoad(MinecraftServer server, Path worldDir) {
         // save server instance
         this.server = new WeakReference<>(server);
-        // initialize bvd manager with config inside the root world directory
+        // initialize BV manager with config inside the root world directory
         Path configPath = worldDir.resolve("betterview.yml");
-        this.manager = new BvdManager(__ -> this, configPath);
+        this.manager = new BetterViewManager(__ -> this, configPath);
     }
 
     public void triggerPostLoad(Set<ResourceKey<Level>> levelKeys) {
-        BvdManager manager = this.getManager();
+        BetterViewManager manager = this.getManager();
         // eagerly load all available dimensions once on startup to allow
         // population of config file - every other dimension gets lazy loaded
         for (ResourceKey<Level> levelKey : levelKeys) {
@@ -98,7 +98,7 @@ public class BetterViewMod implements BetterViewHook, ModInitializer {
         return (PlayerHook) player;
     }
 
-    public BvdManager getManager() {
+    public BetterViewManager getManager() {
         if (this.manager == null) {
             throw new IllegalStateException("Manager not loaded");
         }

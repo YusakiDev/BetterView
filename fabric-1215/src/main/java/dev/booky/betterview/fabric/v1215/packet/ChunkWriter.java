@@ -5,8 +5,6 @@ import ca.spottedleaf.moonrise.patches.starlight.chunk.StarlightChunk;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.VarInt;
 import net.minecraft.world.level.ChunkPos;

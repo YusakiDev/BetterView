@@ -1,7 +1,7 @@
 package dev.booky.betterview.platform;
 // Created by booky10 in BetterView (15:42 03.06.2025)
 
-import dev.booky.betterview.common.BvdManager;
+import dev.booky.betterview.common.BetterViewManager;
 import dev.booky.betterview.common.hooks.BetterViewHook;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.hooks.PlayerHook;
@@ -17,9 +17,9 @@ import java.util.UUID;
 @NullMarked
 public class PaperBetterView implements BetterViewHook {
 
-    private final BvdManager manager;
+    private final BetterViewManager manager;
 
-    public PaperBetterView(BvdManager manager) {
+    public PaperBetterView(BetterViewManager manager) {
         this.manager = manager;
     }
 

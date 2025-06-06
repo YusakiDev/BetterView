@@ -4,8 +4,8 @@ package dev.booky.betterview.nms.v1211;
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor;
 import ca.spottedleaf.moonrise.common.util.ChunkSystem;
 import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder;
-import dev.booky.betterview.common.BvdManager;
-import dev.booky.betterview.common.BvdPlayer;
+import dev.booky.betterview.common.BetterViewManager;
+import dev.booky.betterview.common.BetterViewPlayer;
 import dev.booky.betterview.common.util.ChunkTagResult;
 import dev.booky.betterview.common.util.McChunkPos;
 import dev.booky.betterview.nms.PaperNmsInterface;
@@ -165,7 +165,7 @@ public class NmsAdapter implements PaperNmsInterface {
     }
 
     @Override
-    public void injectPacketHandler(BvdManager manager, NamespacedKey listenerKey) {
+    public void injectPacketHandler(BetterViewManager manager, NamespacedKey listenerKey) {
         ChannelInitializeListenerHolder.addListener(listenerKey, channel -> channel.pipeline()
                 .addBefore("packet_handler", BETTERVIEW_HANDLER, new PacketHandler()));
         // inject existing connections
@@ -191,11 +191,11 @@ public class NmsAdapter implements PaperNmsInterface {
     }
 
     @Override
-    public void saveNetworkPlayer(Channel channel, BvdPlayer bvdPlayer) {
+    public void saveNetworkPlayer(Channel channel, BetterViewPlayer bvPlayer) {
         PacketHandler handler = (PacketHandler) channel.pipeline().get(BETTERVIEW_HANDLER);
         if (handler == null) {
             throw new IllegalStateException("Can't save network player to " + channel + ", no handler found");
         }
-        handler.setPlayer(bvdPlayer);
+        handler.setPlayer(bvPlayer);
     }
 }

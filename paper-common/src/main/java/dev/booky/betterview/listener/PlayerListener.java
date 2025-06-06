@@ -1,7 +1,7 @@
 package dev.booky.betterview.listener;
 // Created by booky10 in BetterView (22:34 03.06.2025)
 
-import dev.booky.betterview.common.BvdManager;
+import dev.booky.betterview.common.BetterViewManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,9 +14,9 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public class PlayerListener implements Listener {
 
-    private final BvdManager manager;
+    private final BetterViewManager manager;
 
-    public PlayerListener(BvdManager manager) {
+    public PlayerListener(BetterViewManager manager) {
         this.manager = manager;
         // initialize players which are already online
         for (Player player : Bukkit.getOnlinePlayers()) {

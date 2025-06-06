@@ -1,7 +1,7 @@
 package dev.booky.betterview.nms.v1214;
 // Created by booky10 in BetterView (23:37 03.06.2025)
 
-import dev.booky.betterview.common.BvdManager;
+import dev.booky.betterview.common.BetterViewManager;
 import dev.booky.betterview.nms.ReflectionUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerTickRateManager;
@@ -31,10 +31,10 @@ public class WrappedServerTickManager extends ServerTickRateManager {
     private static final VarHandle SILENT =
             ReflectionUtil.getField(ServerTickRateManager.class, boolean.class, 1);
 
-    private final BvdManager manager;
+    private final BetterViewManager manager;
     private final ServerTickRateManager delegate;
 
-    public WrappedServerTickManager(MinecraftServer server, BvdManager manager, ServerTickRateManager delegate) {
+    public WrappedServerTickManager(MinecraftServer server, BetterViewManager manager, ServerTickRateManager delegate) {
         super(server);
         this.manager = manager;
         this.delegate = delegate;
@@ -48,7 +48,7 @@ public class WrappedServerTickManager extends ServerTickRateManager {
         SILENT.set(this, SILENT.get(delegate));
     }
 
-    public static void inject(MinecraftServer server, BvdManager manager) {
+    public static void inject(MinecraftServer server, BetterViewManager manager) {
         ServerTickRateManager delegate = server.tickRateManager();
         WrappedServerTickManager wrapped = new WrappedServerTickManager(server, manager, delegate);
         MINECRAFT_SERVER_TICK_RATE_MANAGER.set(server, wrapped);
@@ -64,7 +64,7 @@ public class WrappedServerTickManager extends ServerTickRateManager {
     public void updateJoiningPlayer(ServerPlayer player) {
         // trigger logic start
         this.manager.getPlayer(player.getUUID())
-                .getBvdPlayer().tryTriggerStart();
+                .getBvPlayer().tryTriggerStart();
 
         super.updateJoiningPlayer(player);
     }

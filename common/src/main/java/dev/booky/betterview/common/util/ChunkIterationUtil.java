@@ -12,14 +12,14 @@ public class ChunkIterationUtil {
 
     public static final int MAX_CHUNK_DISTANCE = 128;
 
-    public static final long[][] BVD_RADIUS_ITERATION_LIST = new long[MAX_CHUNK_DISTANCE + 2 + 1][];
+    public static final long[][] RADIUS_ITERATION_LIST = new long[MAX_CHUNK_DISTANCE + 2 + 1][];
 
     static {
         // inspired by how Moonrise's ParallelSearchRadiusIteration works to make this more FAF (fast-as-fuck)
-        for (int radius = 0; radius < BVD_RADIUS_ITERATION_LIST.length; radius++) {
+        for (int radius = 0; radius < RADIUS_ITERATION_LIST.length; radius++) {
             int fradius = radius;
             List<Integer> ints = IntStream.rangeClosed(-radius, radius).boxed().toList();
-            BVD_RADIUS_ITERATION_LIST[radius] = ints.stream()
+            RADIUS_ITERATION_LIST[radius] = ints.stream()
                     .flatMap(chunkX -> ints.stream()
                             .map(chunkZ -> new McChunkPos(chunkX, chunkZ)))
                     .filter(pos -> BetterViewUtil.isWithinRange(

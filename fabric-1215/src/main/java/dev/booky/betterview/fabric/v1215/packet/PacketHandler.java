@@ -1,7 +1,7 @@
 package dev.booky.betterview.fabric.v1215.packet;
 // Created by booky10 in BetterView (22:48 03.06.2025)
 
-import dev.booky.betterview.common.BvdPlayer;
+import dev.booky.betterview.common.BetterViewPlayer;
 import dev.booky.betterview.common.util.BypassedPacket;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -23,7 +23,7 @@ public class PacketHandler extends ChannelOutboundHandlerAdapter {
 
     public static final String HANDLER_NAME = "betterview_handler";
 
-    private @Nullable BvdPlayer player;
+    private @Nullable BetterViewPlayer player;
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
@@ -73,7 +73,7 @@ public class PacketHandler extends ChannelOutboundHandlerAdapter {
         return false; // don't cancel packet
     }
 
-    public void setPlayer(@Nullable BvdPlayer player) {
+    public void setPlayer(@Nullable BetterViewPlayer player) {
         this.player = player;
     }
 }

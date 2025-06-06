@@ -2,8 +2,8 @@ package dev.booky.betterview.platform;
 // Created by booky10 in BetterView (16:27 03.06.2025)
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import dev.booky.betterview.common.BvdCacheEntry;
-import dev.booky.betterview.common.BvdManager;
+import dev.booky.betterview.common.BetterViewManager;
+import dev.booky.betterview.common.ChunkCacheEntry;
 import dev.booky.betterview.common.config.BvLevelConfig;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.util.BetterViewUtil;
@@ -23,15 +23,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @NullMarked
 public class PaperLevel implements LevelHook {
 
-    private final BvdManager manager;
+    private final BetterViewManager manager;
     private final World world;
 
     private final ByteBuf emptyChunkData;
-    private final LoadingCache<McChunkPos, BvdCacheEntry> cache;
+    private final LoadingCache<McChunkPos, ChunkCacheEntry> cache;
     private final boolean voidWorld;
     private final AtomicInteger generatedChunks = new AtomicInteger(0);
 
-    public PaperLevel(BvdManager manager, World world) {
+    public PaperLevel(BetterViewManager manager, World world) {
         this.manager = manager;
         this.world = world;
         this.emptyChunkData = PaperNmsInterface.SERVICE.buildEmptyChunkData(world);
@@ -92,7 +92,7 @@ public class PaperLevel implements LevelHook {
     }
 
     @Override
-    public LoadingCache<McChunkPos, BvdCacheEntry> getBvdCache() {
+    public LoadingCache<McChunkPos, ChunkCacheEntry> getChunkCache() {
         return this.cache;
     }
 

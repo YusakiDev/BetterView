@@ -2,7 +2,7 @@ package dev.booky.betterview.fabric.v1215.mixin.listener;
 // Created by booky10 in BetterView (04:52 05.06.2025)
 
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.booky.betterview.common.BvdManager;
+import dev.booky.betterview.common.BetterViewManager;
 import dev.booky.betterview.common.hooks.PlayerHook;
 import dev.booky.betterview.fabric.v1215.BetterViewMod;
 import dev.booky.betterview.fabric.v1215.packet.PacketHandler;
@@ -31,7 +31,7 @@ public class PlayerListMixin {
             )
     )
     private void postPlayerAdd(CallbackInfo ci, @Local(argsOnly = true) ServerPlayer player) {
-        BvdManager manager = BetterViewMod.INSTANCE.getManager();
+        BetterViewManager manager = BetterViewMod.INSTANCE.getManager();
         manager.getPlayer(player.getUUID()); // load player
     }
 
@@ -49,7 +49,7 @@ public class PlayerListMixin {
             @Local(argsOnly = true) ServerPlayer player
     ) {
         ChannelHandler handler = connection.channel.pipeline().get(PacketHandler.HANDLER_NAME);
-        ((PacketHandler) handler).setPlayer(((PlayerHook) player).getBvdPlayer());
+        ((PacketHandler) handler).setPlayer(((PlayerHook) player).getBvPlayer());
     }
 
     @Inject(
@@ -60,12 +60,12 @@ public class PlayerListMixin {
         ServerPlayer player = ci.getReturnValue();
 
         // unregister player with this uuid and register again to handle respawning
-        BvdManager manager = BetterViewMod.INSTANCE.getManager();
+        BetterViewManager manager = BetterViewMod.INSTANCE.getManager();
         manager.unregisterPlayer(player.getUUID());
         manager.getPlayer(player.getUUID()); // load new player instance
 
-        // replace player hook in bvd player (which was transferred from the previous player)
-        ((PlayerHook) player).getBvdPlayer().replacePlayer((PlayerHook) player);
+        // replace player hook in BV player (which was transferred from the previous player)
+        ((PlayerHook) player).getBvPlayer().replacePlayer((PlayerHook) player);
     }
 
     @Inject(

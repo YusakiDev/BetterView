@@ -25,6 +25,6 @@ public class RegionizedPlayerChunkLoaderMixin {
             remap = false
     )
     private void postPlayerLoaderAdd(ServerPlayer player, CallbackInfo ci) {
-        ((PlayerHook) player).getBvdPlayer().tryTriggerStart();
+        ((PlayerHook) player).getBvPlayer().tryTriggerStart();
     }
 }

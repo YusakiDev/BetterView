@@ -1,8 +1,8 @@
 package dev.booky.betterview.platform;
 // Created by booky10 in BetterView (16:27 03.06.2025)
 
-import dev.booky.betterview.common.BvdManager;
-import dev.booky.betterview.common.BvdPlayer;
+import dev.booky.betterview.common.BetterViewManager;
+import dev.booky.betterview.common.BetterViewPlayer;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.hooks.PlayerHook;
 import dev.booky.betterview.common.util.BetterViewUtil;
@@ -19,15 +19,15 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public class PaperPlayer implements PlayerHook {
 
-    private final BvdManager manager;
+    private final BetterViewManager manager;
     private final Player player;
-    private final BvdPlayer bvdPlayer;
+    private final BetterViewPlayer bvPlayer;
 
-    public PaperPlayer(BvdManager manager, Player player) {
+    public PaperPlayer(BetterViewManager manager, Player player) {
         this.manager = manager;
         this.player = player;
-        this.bvdPlayer = new BvdPlayer(this);
-        PaperNmsInterface.SERVICE.saveNetworkPlayer(this.getNettyChannel(), this.bvdPlayer);
+        this.bvPlayer = new BetterViewPlayer(this);
+        PaperNmsInterface.SERVICE.saveNetworkPlayer(this.getNettyChannel(), this.bvPlayer);
     }
 
     @Override
@@ -73,8 +73,8 @@ public class PaperPlayer implements PlayerHook {
     }
 
     @Override
-    public BvdPlayer getBvdPlayer() {
-        return this.bvdPlayer;
+    public BetterViewPlayer getBvPlayer() {
+        return this.bvPlayer;
     }
 
     @Override

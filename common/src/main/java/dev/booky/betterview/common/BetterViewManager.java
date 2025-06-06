@@ -1,7 +1,7 @@
 package dev.booky.betterview.common;
 // Created by booky10 in BetterView (15:19 03.06.2025)
 
-import dev.booky.betterview.common.BvdPlayer.ChunkQueueEntry;
+import dev.booky.betterview.common.BetterViewPlayer.ChunkQueueEntry;
 import dev.booky.betterview.common.config.BvConfig;
 import dev.booky.betterview.common.config.BvLevelConfig;
 import dev.booky.betterview.common.config.loading.ConfigurateLoader;
@@ -30,11 +30,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-// bvd processing logic is done asynchronously on the netty threads
+// BV processing logic is done asynchronously on the netty threads
 // as this ensures dimension switches don't cause chunks to end up
 // in the wrong dimension because of race conditions
 @NullMarked
-public final class BvdManager {
+public final class BetterViewManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("BetterView");
 
@@ -50,7 +50,7 @@ public final class BvdManager {
     private final Path configPath;
     private BvConfig config;
 
-    public BvdManager(Function<BvdManager, BetterViewHook> hookConstructor, Path configPath) {
+    public BetterViewManager(Function<BetterViewManager, BetterViewHook> hookConstructor, Path configPath) {
         this.hook = hookConstructor.apply(this);
         this.configPath = configPath;
         this.config = this.loadConfig();
@@ -120,12 +120,12 @@ public final class BvdManager {
     }
 
     private void tickPlayer(PlayerHook player, LevelHook level, McChunkPos chunkPos, long deadline) {
-        BvdPlayer bvd = player.getBvdPlayer();
+        BetterViewPlayer bv = player.getBvPlayer();
 
         // tick player movement
-        bvd.move(level, chunkPos);
+        bv.move(level, chunkPos);
 
-        if (!bvd.preTick()) {
+        if (!bv.preTick()) {
             return; // don't tick player
         }
 
@@ -134,20 +134,20 @@ public final class BvdManager {
         int chunkQueueSize = level.getConfig().getChunkQueueSize();
         do {
             // check if any chunks are built and ready for sending
-            bvd.chunkQueue.removeIf(bvd::checkQueueEntry);
+            bv.chunkQueue.removeIf(bv::checkQueueEntry);
 
-            if (bvd.chunkQueue.size() >= chunkQueueSize) {
+            if (bv.chunkQueue.size() >= chunkQueueSize) {
                 break; // limit how many chunks a player can queue at once
             }
 
-            McChunkPos nextChunk = bvd.pollChunkPos();
+            McChunkPos nextChunk = bv.pollChunkPos();
             if (nextChunk == null) {
                 break; // nothing left to process, player can see everything
             }
 
             // start building chunk queue and add to processing queue
-            CompletableFuture<@Nullable ByteBuf> future = level.getBvdCache().get(nextChunk).get();
-            bvd.chunkQueue.add(new ChunkQueueEntry(nextChunk, future));
+            CompletableFuture<@Nullable ByteBuf> future = level.getChunkCache().get(nextChunk).get();
+            bv.chunkQueue.add(new ChunkQueueEntry(nextChunk, future));
 
             // check if a limit has been reached
             if (chunksPerTick-- <= 0) {
