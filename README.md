@@ -2,8 +2,8 @@
 
 ## Description
 
-BetterView is a paper plugin and fabric mod for Minecraft servers. It extends the normal view distance to extreme
-lengths using asynchronous player processing, chunk caching and direct chunk reading.
+BetterView is a paper plugin and fabric mod for Minecraft servers. It extends the normal view distance
+to extreme lengths using asynchronous player processing, chunk caching and direct chunk reading.
 
 ## Features
 
@@ -13,6 +13,7 @@ lengths using asynchronous player processing, chunk caching and direct chunk rea
 - Configurable chunk data caching for fast access
 - Configurable limitations for chunk sending and chunk generation
 - Per-dimension configuration options
+- Support for integrated or dedicated fabric servers
 
 <details>
 <summary><strong>Example: Loading speed for a view distance of 127 chunks</strong></summary>
@@ -38,9 +39,9 @@ On fabric, this mod depends on [Moonrise](https://github.com/Tuinity/Moonrise) t
 
 ## Usage
 
-On Paper servers, place the jar file in your `plugins` directory and restart your server. On Fabric, place the jar file
-in your `mods` directory and restart your server or client. By default, BetterView will configure a view distance of 32
-chunks for each dimension.
+On Paper servers, place the jar file in your `plugins` directory and restart your server. On Fabric servers/clients,
+place the jar file in your `mods` directory and restart your server or client. By default, BetterView will configure a
+view distance of 32 chunks for each dimension.
 
 ### Configuration
 
@@ -49,6 +50,8 @@ On the first start, this plugin will automatically create a configuration file. 
 to configure the following options:
 
 - `config-version`: Don't touch this
+- `integrated-server-render-distance`: Only relevant for singleplayer worlds, this allows replacing the render distance
+  of the integrated server as BetterView would otherwise have no effect (default: `-1`, disabled)
 - `global`:
     - `enabled`: Whether to enable or disable the entire plugin/mod (default: `true`)
     - `chunk-generation-limit`: How many new chunks can be generated globally in one tick (default: `3`)

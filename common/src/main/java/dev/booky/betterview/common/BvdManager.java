@@ -160,10 +160,6 @@ public final class BvdManager {
         return this.generatedChunks.getAndIncrement() <= this.config.getGlobalConfig().getChunkGenerationLimit();
     }
 
-    public BvLevelConfig getConfig(Key worldName) {
-        return this.config.getLevelConfig(worldName);
-    }
-
     public LevelHook getLevel(Key worldName) {
         return this.levels.computeIfAbsent(worldName.asString(), this.hook::constructLevel);
     }
@@ -178,5 +174,13 @@ public final class BvdManager {
 
     public void unregisterPlayer(UUID playerId) {
         this.players.remove(playerId);
+    }
+
+    public BvLevelConfig getConfig(Key worldName) {
+        return this.config.getLevelConfig(worldName);
+    }
+
+    public BvConfig getConfig() {
+        return this.config;
     }
 }

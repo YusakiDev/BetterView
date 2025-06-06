@@ -3,6 +3,7 @@ package dev.booky.betterview.common;
 import dev.booky.betterview.common.hooks.LevelHook;
 import dev.booky.betterview.common.hooks.PlayerHook;
 import dev.booky.betterview.common.util.BetterViewUtil;
+import dev.booky.betterview.common.util.BypassedPacket;
 import dev.booky.betterview.common.util.ChunkIterationUtil;
 import dev.booky.betterview.common.util.McChunkPos;
 import io.netty.buffer.ByteBuf;
@@ -316,7 +317,7 @@ public final class BvdPlayer {
         ByteBuf finalChunkBuf = chunkBuf.isReadable()
                 ? chunkBuf.retainedSlice()
                 : this.level.getEmptyChunkBuf(chunkPos);
-        this.player.getNettyChannel().write(finalChunkBuf);
+        this.player.getNettyChannel().write(new BypassedPacket(finalChunkBuf));
         state.lifecycle = BVD_LOADED; // mark chunk as loaded by bvd
         return true;
     }
