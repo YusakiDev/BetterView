@@ -11,7 +11,7 @@
   ],
 
   "license": "LGPL-3.0-only",
-  "environment": "server",
+  "environment": "*",
 
   "depends": {
     "java": ">=21"

@@ -25,7 +25,6 @@ paper-v1215 = "1.21.5-R0.1-SNAPSHOT"
 
 # fabric
 fabric-loader = "0.16.14"
-minecraft-base = "1.21.1"
 option = "1.1.0" # minimum version required for configurate
 minecraft-v1211 = "1.21.1"
 parchment-v1211 = "2024.11.17"
@@ -68,7 +67,6 @@ paper-api-base = { module = "io.papermc.paper:paper-api", version.ref = "paper-b
 
 # fabric
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-minecraft-base = { module = "com.mojang:minecraft", version.ref = "minecraft-base" }
 option = { module = "net.kyori:option", version.ref = "option" }
 minecraft-v1211 = { module = "com.mojang:minecraft", version.ref = "minecraft-v1211" }
 parchment-v1211 = { module = "org.parchmentmc.data:parchment-1.21.1", version.ref = "parchment-v1211" }

@@ -1,21 +1,27 @@
 import net.fabricmc.loom.task.AbstractRemapJarTask
 import net.fabricmc.loom.task.RemapJarTask
+import net.fabricmc.loom.task.prod.ClientProductionRunTask
 import net.fabricmc.loom.task.prod.ServerProductionRunTask
 
 plugins {
     alias(libs.plugins.loom)
 }
 
+val testTaskVersion = "1.21.1"
+val testTaskVersionFiltered = testTaskVersion.replace(".", "")
+
 // intermediary mappings are useless here
 loom.noIntermediateMappings()
 
 val includeAll: Configuration by configurations.creating
-val runtimeMods: Configuration by configurations.creating
 
 dependencies {
     // dummy fabric env setup
-    minecraft(libs.minecraft.base)
+    minecraft("com.mojang:minecraft:$testTaskVersion")
     mappings(loom.officialMojangMappings())
+    // required for production run tasks, otherwise we
+    // will just get cryptic error messages
+    modImplementation(libs.fabric.loader)
 
     // include common project once
     include(projects.common)
@@ -35,7 +41,7 @@ dependencies {
         .forEach { include(it) }
 
     // version-specific runtime mods
-    runtimeMods(libs.moonrise.v1215)
+    productionRuntimeMods(libs.moonrise.create("moonrise.v$testTaskVersionFiltered"))
 }
 
 tasks.named<ProcessResources>("processResources") {
@@ -80,11 +86,13 @@ abstract class CustomServerProductionRunTask : ServerProductionRunTask {
 }
 
 tasks.register<CustomServerProductionRunTask>("prodServer") {
-    minecraftVersion = "1.21.5"
-    loaderVersion = libs.versions.fabric.loader
     javaLauncher = javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(21)
     }
-    // include runtime mods
-    mods.from(runtimeMods)
+}
+
+tasks.register<ClientProductionRunTask>("prodClient") {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
