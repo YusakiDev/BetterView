@@ -16,7 +16,6 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 
-import static dev.booky.betterview.common.BvdManager.CHUNK_QUEUE_SIZE;
 import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.BVD_LOADED;
 import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.BVD_QUEUED;
 import static dev.booky.betterview.common.BvdPlayer.ChunkLifecycle.SERVER_LOADED;
@@ -50,7 +49,7 @@ public final class BvdPlayer {
     public McChunkPos chunkPos;
 
     // a queue of chunk packets currently being built asynchronously
-    public final Queue<ChunkQueueEntry> chunkQueue = new ArrayDeque<>(CHUNK_QUEUE_SIZE);
+    public final Queue<ChunkQueueEntry> chunkQueue = new ArrayDeque<>();
 
     public int distance;
     public int storageRadius;

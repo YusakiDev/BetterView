@@ -45,6 +45,7 @@ to configure the following options:
     - `<dimension>` (e.g. `minecraft:overworld`):
         - `enabled`: Whether to enable or disable the plugin/mod for this dimension (default: `true`)
         - `chunk-generation-limit`: How many new chunks can be generated for this level in one tick (default: `2`)
+        - `chunk-queue-size`: How many chunks can be queued per player at once (default: `16`)
         - `view-distance`: The maximum extended view distance for this dimension (default: `32`)
         - `cache-duration`: The cache duration for how long extended chunks should be kept in memory (default: `PT5M`,
           5 minutes)

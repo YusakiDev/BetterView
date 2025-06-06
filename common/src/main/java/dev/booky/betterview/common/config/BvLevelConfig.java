@@ -15,6 +15,8 @@ public class BvLevelConfig {
     private boolean enabled = true;
     @Comment("How many new chunks can be generated for this level in one tick")
     private int chunkGenerationLimit = 2;
+    @Comment("How many chunks can be queued per player at once")
+    private int chunkQueueSize = 16;
     @Comment("The maximum extended view distance for this level")
     private int viewDistance = 32;
     @Comment("The cache duration for all extended chunks, after which they will be re-build")
@@ -26,6 +28,10 @@ public class BvLevelConfig {
 
     public int getChunkGenerationLimit() {
         return this.chunkGenerationLimit;
+    }
+
+    public int getChunkQueueSize() {
+        return this.chunkQueueSize;
     }
 
     public int getViewDistance() {

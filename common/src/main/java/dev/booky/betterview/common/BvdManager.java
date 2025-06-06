@@ -38,8 +38,8 @@ public final class BvdManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("BetterView");
 
+    // determines how much of a tick this plugin is allowed to process at maximum
     static final int TICK_LENGTH_DIVISOR = 2;
-    static final int CHUNK_QUEUE_SIZE = 16;
 
     private final AtomicInteger generatedChunks = new AtomicInteger(0);
     private final BetterViewHook hook;
@@ -131,12 +131,13 @@ public final class BvdManager {
 
         // start processing chunks (process at least once)
         int chunksPerTick = this.config.getGlobalConfig().getChunkSendLimit();
+        int chunkQueueSize = level.getConfig().getChunkQueueSize();
         do {
             // check if any chunks are built and ready for sending
             bvd.chunkQueue.removeIf(bvd::checkQueueEntry);
 
-            if (bvd.chunkQueue.size() >= CHUNK_QUEUE_SIZE) {
-                break; // fail-safe to prevent OOM because of too long queue
+            if (bvd.chunkQueue.size() >= chunkQueueSize) {
+                break; // limit how many chunks a player can queue at once
             }
 
             McChunkPos nextChunk = bvd.pollChunkPos();
