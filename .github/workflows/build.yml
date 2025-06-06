@@ -24,7 +24,7 @@ jobs:
           cache: gradle
 
       - name: Build project
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --no-daemon --parallel
 
       - name: Upload project jars
         uses: actions/upload-artifact@v4
