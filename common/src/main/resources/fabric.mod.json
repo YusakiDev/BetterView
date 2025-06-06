@@ -5,7 +5,7 @@
   "name": "BetterView Common",
 
   "icon": "assets/betterview/icon.png",
-  "description": "Implements asynchronous lightweight view distance",
+  "description": "Common logic for extending the normal server view distance to extreme lengths",
   "authors": [
     "booky10"
   ],

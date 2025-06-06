@@ -4,8 +4,14 @@
   "version": "${version}",
   "name": "BetterView 1.21.1",
 
+  "contact": {
+    "sources": "https://github.com/MinceraftMC/BetterView",
+    "issues": "https://github.com/MinceraftMC/BetterView/issues",
+    "homepage": "https://minceraft.dev/betterview"
+  },
+
   "icon": "assets/betterview/icon.png",
-  "description": "Implements asynchronous lightweight view distance for 1.21.1",
+  "description": "Extends the normal server view distance to extreme lengths for 1.21.1",
   "authors": [
     "booky10"
   ],
