@@ -7,6 +7,7 @@ import dev.booky.betterview.listener.PlayerListener;
 import dev.booky.betterview.listener.TickListener;
 import dev.booky.betterview.nms.PaperNmsInterface;
 import dev.booky.betterview.platform.PaperBetterView;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,6 +30,9 @@ public class BetterViewPlugin extends JavaPlugin {
     @Override
     public void onLoad() {
         this.listenerKey = new NamespacedKey(this, "packets");
+
+        // see https://bstats.org/plugin/bukkit/BetterView/26105
+        new Metrics(this, 26105);
     }
 
     @Override

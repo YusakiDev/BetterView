@@ -30,6 +30,12 @@ tasks.withType<ShadowJar> {
     // final paper jar, place it in root build dir
     destinationDirectory = rootProject.layout.buildDirectory.dir("libs")
     archiveClassifier = ""
+    // relocate shaded dependencies
+    mapOf(
+        "org.bstats" to "bstats"
+    ).forEach { key, value ->
+        relocate(key, "${project.group}.libs.$value")
+    }
 }
 
 tasks.named("assemble") {
