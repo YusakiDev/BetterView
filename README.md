@@ -46,8 +46,8 @@ view distance of 32 chunks for each dimension.
 ### Configuration
 
 On the first start, this plugin will automatically create a configuration file. If using Paper it will be created at
-`plugins/BetterView/config.yml`, if using Fabric it will be created at `config/betterview.yml`. In there, you are able
-to configure the following options:
+`plugins/BetterView/config.yml`, if using Fabric it will be created as `betterview.yml` inside your world directory
+(e.g. `world` for dedicated servers). In there, you are able to configure the following options:
 
 - `config-version`: Don't touch this
 - `integrated-server-render-distance`: Only relevant for singleplayer worlds, this allows replacing the render distance

@@ -43,11 +43,11 @@ public class BetterViewMod implements BetterViewHook, ModInitializer {
         // NO-OP
     }
 
-    public void triggerPreLoad(MinecraftServer server) {
+    public void triggerPreLoad(MinecraftServer server, Path worldDir) {
         // save server instance
         this.server = new WeakReference<>(server);
-        // initialize bvd manager
-        Path configPath = FabricLoader.getInstance().getConfigDir().resolve("betterview.yml");
+        // initialize bvd manager with config inside the root world directory
+        Path configPath = worldDir.resolve("betterview.yml");
         this.manager = new BvdManager(__ -> this, configPath);
     }
 
