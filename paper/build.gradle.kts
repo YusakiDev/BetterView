@@ -10,11 +10,16 @@ plugins {
 
 dependencies {
     compileOnly(libs.paper.api.base)
-    implementation(projects.paperCommon)
 
+    // include paper common subproject
+    implementation(projects.paperCommon)
+    // include paper nms subprojects
     rootProject.subprojects
         .filter { it.name.matches("^paper-\\d+$".toRegex()) }
         .forEach { runtimeOnly(it) }
+
+    // download caffeine caching library on runtime
+    library(libs.caffeine)
 }
 
 tasks.withType<Jar> {
@@ -23,6 +28,8 @@ tasks.withType<Jar> {
             "paperweight-mappings-namespace" to "mojang"
         )
     )
+    // this isn't a fabric mod, exclude this
+    exclude("fabric.mod.json")
 }
 
 tasks.withType<ShadowJar> {
