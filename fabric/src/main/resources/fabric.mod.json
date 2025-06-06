@@ -10,10 +10,18 @@
     "booky10"
   ],
 
-  "license": "LGPL-3.0-only",
+  "license": "GPL-3.0-only",
   "environment": "*",
 
   "depends": {
-    "java": ">=21"
+    "fabricloader": ">=0.16.10",
+    "minecraft": [
+      "1.21.1",
+      "1.21.3",
+      "1.21.4",
+      "1.21.5"
+    ],
+    "java": ">=21",
+    "moonrise": "*"
   }
 }
