@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "dev.booky.betterview"
-    version = "2.0.0-SNAPSHOT"
+    version = "2.0.0"
 }
 
 subprojects {
