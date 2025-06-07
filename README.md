@@ -1,5 +1,11 @@
 # BetterView
 
+<img src="https://i.imgur.com/bD8OLfE.png" alt="logo" width="200">
+
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/MinceraftMC/BetterView?style=flat-square)](https://github.com/MinceraftMC/BetterView)
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg?style=flat-square)](https://opensource.org/license/gpl-v3/)
+[![Discord](https://img.shields.io/discord/1094193723191070793?style=flat-square&label=Discord&link=https%3A%2F%2Fdiscord.gg%2FzC8xjtSPKC)](https://discord.gg/zC8xjtSPKC)
+
 ## Description
 
 BetterView is a high-performance Paper plugin and Fabric mod for Minecraft servers. It extends the normal view distance
