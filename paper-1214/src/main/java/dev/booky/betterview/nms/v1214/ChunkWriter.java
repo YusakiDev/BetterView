@@ -33,26 +33,33 @@ public final class ChunkWriter {
 
     private static final VarHandle NON_EMPTY_BLOCK_COUNT = ReflectionUtil.getField(LevelChunkSection.class, short.class, 0);
 
+    private static final int[] ANTI_XRAY_OBF_STATES = Stream.of(
+                    Blocks.STONE, Blocks.DEEPSLATE,
+                    Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE,
+                    Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE,
+                    Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE,
+                    Blocks.EMERALD_ORE, Blocks.DEEPSLATE_EMERALD_ORE,
+                    Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE,
+                    Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_REDSTONE_ORE,
+                    Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE,
+                    Blocks.NETHER_GOLD_ORE, Blocks.NETHER_QUARTZ_ORE,
+                    Blocks.ANCIENT_DEBRIS, Blocks.SPAWNER
+            )
+            .flatMap(block -> block.getStateDefinition().getPossibleStates().stream())
+            .mapToInt(Block.BLOCK_STATE_REGISTRY::getId)
+            .toArray();
     private static final AntiXrayProcessor ANTI_XRAY = new AntiXrayProcessor(
             ReplacementStrategy::replaceStaticZero,
             ReplacementPresets.createStaticZeroSplit(
                     new int[]{Block.BLOCK_STATE_REGISTRY.getId(Blocks.STONE.defaultBlockState())},
                     new int[]{Block.BLOCK_STATE_REGISTRY.getId(Blocks.DEEPSLATE.defaultBlockState())}),
-            Stream.of(
-                            Blocks.STONE, Blocks.DEEPSLATE,
-                            Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE,
-                            Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE,
-                            Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE,
-                            Blocks.EMERALD_ORE, Blocks.DEEPSLATE_EMERALD_ORE,
-                            Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE,
-                            Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_REDSTONE_ORE,
-                            Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE,
-                            Blocks.NETHER_GOLD_ORE, Blocks.NETHER_QUARTZ_ORE,
-                            Blocks.ANCIENT_DEBRIS, Blocks.SPAWNER
-                    )
-                    .flatMap(block -> block.getStateDefinition().getPossibleStates().stream())
-                    .mapToInt(Block.BLOCK_STATE_REGISTRY::getId)
-                    .toArray(),
+            ANTI_XRAY_OBF_STATES,
+            Block.BLOCK_STATE_REGISTRY.size()
+    );
+    private static final AntiXrayProcessor ANTI_XRAY_R = new AntiXrayProcessor(
+            ReplacementStrategy::replaceRandomLayered,
+            ReplacementPresets.createStatic(ANTI_XRAY_OBF_STATES),
+            ANTI_XRAY_OBF_STATES,
             Block.BLOCK_STATE_REGISTRY.size()
     );
 
@@ -155,7 +162,7 @@ public final class ChunkWriter {
         int wi = buf.writerIndex();
         section.states.write(buf, null, 0);
         buf.readerIndex(wi);
-        ANTI_XRAY.process(buf, sectionY, true);
+        ANTI_XRAY_R.process(buf, sectionY, true);
         buf.readerIndex(ri);
 
         section.getBiomes().write(buf, null, 0);
