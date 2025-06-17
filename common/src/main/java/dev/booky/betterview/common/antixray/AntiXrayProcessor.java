@@ -1,13 +1,18 @@
 package dev.booky.betterview.common.antixray;
 // Created by booky10 in BetterView (19:40 16.06.2025)
 
+import dev.booky.betterview.common.config.BvLevelConfig.AntiXrayConfig;
 import dev.booky.betterview.common.util.MathUtil;
 import dev.booky.betterview.common.util.VarIntUtil;
 import io.netty.buffer.ByteBuf;
+import net.kyori.adventure.key.Key;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * This is a simple anti-xray, which would break under normal circumstances but
@@ -48,6 +53,31 @@ public final class AntiXrayProcessor {
         for (int i = 0, len = obfuscatedStates.length; i < len; i++) {
             this.obfuscatedStates.set(obfuscatedStates[i]);
         }
+    }
+
+    public static @Nullable AntiXrayProcessor createProcessor(
+            AntiXrayConfig config,
+            ReplacementPresets levelPresets,
+            Function<Key, Stream<Integer>> stateListFn,
+            int stateRegistrySize
+    ) {
+        if (!config.isEnabled()) {
+            return null;
+        }
+        // convert list of hidden blocks to blockstate ids
+        int[] states = config.getHiddenBlocks().stream()
+                .flatMap(stateListFn)
+                .mapToInt(i -> i)
+                .distinct()
+                .toArray();
+        return new AntiXrayProcessor(
+                config.getEngineMode().getStrategy(),
+                // use base block of level for hide-mode, otherwise use obfuscated states
+                config.getEngineMode() == AntiXrayConfig.EngineMode.HIDE ? levelPresets :
+                        // use replaced states for obfuscation mode
+                        ReplacementPresets.createStatic(states),
+                states, stateRegistrySize
+        );
     }
 
     /**
