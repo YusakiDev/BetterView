@@ -91,7 +91,6 @@ public final class AntiXrayProcessor {
         BitSet obfuscatedPalette = null;
         // the presets array, but with palette indices of the preset blockstates as a value
         int[] presetPalette = null;
-        System.out.println("presets: " + Arrays.toString(presets));
 
         switch (paletteBits) {
             // single value palette
@@ -132,7 +131,6 @@ public final class AntiXrayProcessor {
                     }
                     presetPalette[presetIndex] = 0;
                 }
-                System.out.println("old palette: just " + value);
                 newPalette[0] = value;
                 newPaletteBits = MathUtil.ceilLog2(newPalette.length);
                 break;
@@ -174,7 +172,6 @@ public final class AntiXrayProcessor {
                 if (obfuscatedPalette == null) {
                     return; // nothing to obfuscate, cancel processing
                 }
-                System.out.println("old palette: " + Arrays.toString(palette));
                 // check if we need to modify the palette; if extraPaletteSize
                 // is zero, all presets are already present in the existing palette and
                 // we don't need to do anything
@@ -215,11 +212,6 @@ public final class AntiXrayProcessor {
                 presetPalette = presets;
             }
         }
-        System.out.println("obfuscation set: " + obfuscatedPalette);
-        if (newPalette != null) {
-            System.out.println("new palette: " + Arrays.toString(newPalette));
-        }
-        System.out.println("preset palette: " + Arrays.toString(presetPalette));
 
         // so, at this stage we have figured out we need to obfuscate some blocks
         // as we've read the palette; the next step is read the storage and
@@ -261,7 +253,6 @@ public final class AntiXrayProcessor {
         // determine whether we need to resize the storage
         assert newPaletteBits >= paletteStorageBits;
         boolean resize = paletteStorageBits != newPaletteBits;
-        System.out.println(paletteStorageBits + " -> " + newPaletteBits + (resize ? " (RESIZE!)" : ""));
 
         int newValuesPerWord;
         long[] newStorage;
@@ -275,7 +266,6 @@ public final class AntiXrayProcessor {
             int newWordCount = (STORAGE_SIZE_3D + newValuesPerWord - 1) / newValuesPerWord;
             newStorage = new long[newWordCount];
         }
-        System.out.println("new: " + newStorage.length + " " + newValuesPerWord);
 
         ReplacementStrategy strategy = this.strategy.construct(presetCount);
         for (int y = 0; y < STORAGE_SIZE; y++) {
