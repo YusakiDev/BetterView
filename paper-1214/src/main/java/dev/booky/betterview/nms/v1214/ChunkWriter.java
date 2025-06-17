@@ -1,6 +1,10 @@
 package dev.booky.betterview.nms.v1214;
 // Created by booky10 in BetterView (20:38 03.06.2025)
 
+import dev.booky.betterview.common.antixray.AntiXrayProcessor;
+import dev.booky.betterview.common.antixray.ReplacementPresets;
+import dev.booky.betterview.common.antixray.ReplacementStrategy;
+import dev.booky.betterview.nms.ReflectionUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
@@ -8,6 +12,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.VarInt;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -15,13 +21,36 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.lang.invoke.VarHandle;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 @NullMarked
 public final class ChunkWriter {
 
     static final Heightmap.Types[] SENDABLE_HEIGHTMAP_TYPES = Arrays.stream(Heightmap.Types.values())
             .filter(Heightmap.Types::sendToClient).toArray(Heightmap.Types[]::new);
+
+    private static final VarHandle NON_EMPTY_BLOCK_COUNT = ReflectionUtil.getField(LevelChunkSection.class, short.class, 0);
+
+    private static final AntiXrayProcessor ANTI_XRAY = new AntiXrayProcessor(
+            ReplacementStrategy::replaceStaticZero,
+            ReplacementPresets.createStaticZeroSplit(
+                    new int[]{Block.BLOCK_STATE_REGISTRY.getId(Blocks.STONE.defaultBlockState())},
+                    new int[]{Block.BLOCK_STATE_REGISTRY.getId(Blocks.DEEPSLATE.defaultBlockState())}),
+            Stream.of(
+                            Blocks.OAK_PLANKS, Blocks.BIRCH_PLANKS, Blocks.STONE, Blocks.DEEPSLATE,
+                            Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE, Blocks.BEDROCK,
+                            Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE,
+                            Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE,
+                            Blocks.EMERALD_ORE, Blocks.DEEPSLATE_EMERALD_ORE,
+                            Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE
+                    )
+                    .flatMap(block -> block.getStateDefinition().getPossibleStates().stream())
+                    .mapToInt(Block.BLOCK_STATE_REGISTRY::getId)
+                    .toArray(),
+            Block.BLOCK_STATE_REGISTRY.size()
+    );
 
     private ChunkWriter() {
     }
@@ -89,28 +118,41 @@ public final class ChunkWriter {
             CompoundTag heightmapsTag, LevelChunkSection[] sections,
             byte[][] blockLight, byte @Nullable [][] skyLight
     ) {
-        // calculate serialized size of chunk data
-        int serializedSize = 0;
-        for (int i = 0, len = sections.length; i < len; i++) {
-            serializedSize += sections[i].getSerializedSize();
-        }
         // write heightmaps nbt tag
         FriendlyByteBuf.writeNbt(buf, heightmapsTag);
-        // directly write chunk data, don't create useless sub-buffer
-        VarInt.write(buf, serializedSize);
-        int expectedWriterIndex = buf.writerIndex() + serializedSize;
-        FriendlyByteBuf friendlyBuf = new FriendlyByteBuf(buf);
-        for (int i = 0, len = sections.length; i < len; i++) {
-            sections[i].write(friendlyBuf, null, 0);
+        // directly write chunk data, don't create useless sub-buffer TODO re-implement this behavior
+        ByteBuf subBuf = PooledByteBufAllocator.DEFAULT.buffer();
+        try {
+            FriendlyByteBuf friendlyBuf = new FriendlyByteBuf(subBuf);
+            for (int i = 0, len = sections.length; i < len; i++) {
+                writeSection(friendlyBuf, sections[i]);
+            }
+            VarInt.write(buf, subBuf.readableBytes());
+            buf.writeBytes(subBuf);
+        } finally {
+            subBuf.release();
         }
         // ensure the vanilla client can read this data
-        if (buf.writerIndex() != expectedWriterIndex) {
-            throw new IllegalStateException("Expected writer index to be at "
-                    + expectedWriterIndex + ", got " + buf.writerIndex());
-        }
+//        if (buf.writerIndex() != expectedWriterIndex) {
+//            throw new IllegalStateException("Expected writer index to be at "
+//                    + expectedWriterIndex + ", got " + buf.writerIndex());
+//        }
         // skip writing block entity list
         VarInt.write(buf, 0);
         // write light data
         LightWriter.writeLightData(buf, blockLight, skyLight);
+    }
+
+    private static void writeSection(FriendlyByteBuf buf, LevelChunkSection section) {
+        buf.writeShort((short) NON_EMPTY_BLOCK_COUNT.get(section));
+
+        int ri = buf.readerIndex();
+        int wi = buf.writerIndex();
+        section.states.write(buf, null, 0);
+        buf.readerIndex(wi);
+        ANTI_XRAY.process(buf, 0, true);
+        buf.readerIndex(ri);
+
+        section.getBiomes().write(buf, null, 0);
     }
 }
