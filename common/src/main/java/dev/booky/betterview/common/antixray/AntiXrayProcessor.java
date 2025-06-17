@@ -148,7 +148,9 @@ public final class AntiXrayProcessor {
                     int value = VarIntUtil.readVarInt(buf);
                     palette[i] = value;
                     // check if this blockstate needs to be obfuscated
-                    if (this.obfuscatedStates.get(value)) {
+                    if (this.obfuscatedStates.get(value)
+                            // don't obfuscate if this is the only replacement state
+                            && (presetCount != 1 || presets[0] != value)) {
                         if (obfuscatedPalette == null) {
                             obfuscatedPalette = BitSet.valueOf(EMPTY_LONG_ARRAY);
                             obfuscatedPalette.set(paletteSize); // expand
