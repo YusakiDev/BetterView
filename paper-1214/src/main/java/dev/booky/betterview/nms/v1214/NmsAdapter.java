@@ -157,7 +157,7 @@ public class NmsAdapter implements PaperNmsInterface {
             CompoundTag heightmapTags = ChunkWriter.extractHeightmapTags(chunk);
             byte[][] blockLight = LightWriter.convertStarlightToBytes(chunk.starlight$getBlockNibbles(), false);
             byte[][] skyLight = LightWriter.convertStarlightToBytes(chunk.starlight$getSkyNibbles(), true);
-            ChunkWriter.writeFullBody(buf, heightmapTags, chunk.getSections(), blockLight, skyLight);
+            ChunkWriter.writeFullBody(buf, level.getMinSectionY(), heightmapTags, chunk.getSections(), blockLight, skyLight);
             return buf.retain();
         } finally {
             buf.release();

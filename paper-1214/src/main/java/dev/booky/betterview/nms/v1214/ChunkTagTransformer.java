@@ -176,7 +176,7 @@ public final class ChunkTagTransformer {
         CompoundTag heightmapsTag = filterHeightmaps(chunkTag);
         // delegate to chunk writing method
         return ChunkWriter.writeFull(
-                pos.x, pos.z, heightmapsTag,
+                pos.x, pos.z, level.getMinSectionY(), heightmapsTag,
                 sections, blockLight, skyLight
         );
     }

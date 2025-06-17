@@ -39,12 +39,16 @@ public final class ChunkWriter {
                     new int[]{Block.BLOCK_STATE_REGISTRY.getId(Blocks.STONE.defaultBlockState())},
                     new int[]{Block.BLOCK_STATE_REGISTRY.getId(Blocks.DEEPSLATE.defaultBlockState())}),
             Stream.of(
-                            Blocks.OAK_PLANKS, Blocks.BIRCH_PLANKS, Blocks.STONE, Blocks.DEEPSLATE,
-                            Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE, Blocks.BEDROCK,
+                            Blocks.STONE, Blocks.DEEPSLATE,
+                            Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE,
                             Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE,
                             Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE,
                             Blocks.EMERALD_ORE, Blocks.DEEPSLATE_EMERALD_ORE,
-                            Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE
+                            Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE,
+                            Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_REDSTONE_ORE,
+                            Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE,
+                            Blocks.NETHER_GOLD_ORE, Blocks.NETHER_QUARTZ_ORE,
+                            Blocks.ANCIENT_DEBRIS, Blocks.SPAWNER
                     )
                     .flatMap(block -> block.getStateDefinition().getPossibleStates().stream())
                     .mapToInt(Block.BLOCK_STATE_REGISTRY::getId)
@@ -90,11 +94,12 @@ public final class ChunkWriter {
         byte[][] blockLight = LightWriter.convertStarlightToBytes(chunk.starlight$getBlockNibbles(), false);
         byte[][] skyLight = LightWriter.convertStarlightToBytes(chunk.starlight$getSkyNibbles(), true);
         // delegate to chunk writing method
-        return writeFull(chunk.locX, chunk.locZ, heightmapTags, chunk.getSections(), blockLight, skyLight);
+        return writeFull(chunk.locX, chunk.locZ, chunk.getMinSectionY(),
+                heightmapTags, chunk.getSections(), blockLight, skyLight);
     }
 
     public static ByteBuf writeFull(
-            int chunkX, int chunkZ, CompoundTag heightmapsTag,
+            int chunkX, int chunkZ, int minSectionY, CompoundTag heightmapsTag,
             LevelChunkSection[] sections, byte[][] blockLight, byte @Nullable [][] skyLight
     ) {
         // allocate pooled buffer
@@ -106,7 +111,7 @@ public final class ChunkWriter {
             buf.writeInt(chunkX);
             buf.writeInt(chunkZ);
             // write buffer body
-            writeFullBody(buf, heightmapsTag, sections, blockLight, skyLight);
+            writeFullBody(buf, minSectionY, heightmapsTag, sections, blockLight, skyLight);
             return buf.retain();
         } finally {
             buf.release();
@@ -114,7 +119,7 @@ public final class ChunkWriter {
     }
 
     public static void writeFullBody(
-            ByteBuf buf,
+            ByteBuf buf, int minSectionY,
             CompoundTag heightmapsTag, LevelChunkSection[] sections,
             byte[][] blockLight, byte @Nullable [][] skyLight
     ) {
@@ -125,7 +130,7 @@ public final class ChunkWriter {
         try {
             FriendlyByteBuf friendlyBuf = new FriendlyByteBuf(subBuf);
             for (int i = 0, len = sections.length; i < len; i++) {
-                writeSection(friendlyBuf, sections[i]);
+                writeSection(friendlyBuf, sections[i], i + minSectionY);
             }
             VarInt.write(buf, subBuf.readableBytes());
             buf.writeBytes(subBuf);
@@ -143,14 +148,14 @@ public final class ChunkWriter {
         LightWriter.writeLightData(buf, blockLight, skyLight);
     }
 
-    private static void writeSection(FriendlyByteBuf buf, LevelChunkSection section) {
+    private static void writeSection(FriendlyByteBuf buf, LevelChunkSection section, int sectionY) {
         buf.writeShort((short) NON_EMPTY_BLOCK_COUNT.get(section));
 
         int ri = buf.readerIndex();
         int wi = buf.writerIndex();
         section.states.write(buf, null, 0);
         buf.readerIndex(wi);
-        ANTI_XRAY.process(buf, 0, true);
+        ANTI_XRAY.process(buf, sectionY, true);
         buf.readerIndex(ri);
 
         section.getBiomes().write(buf, null, 0);
