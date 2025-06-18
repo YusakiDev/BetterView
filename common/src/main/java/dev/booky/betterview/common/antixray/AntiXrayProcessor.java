@@ -161,8 +161,12 @@ public final class AntiXrayProcessor {
                     }
                     presetPalette[presetIndex] = 0;
                 }
+                // don't move single value away from position 0
                 newPalette[0] = value;
-                newPaletteBits = MathUtil.ceilLog2(newPalette.length);
+                // when resizing a single-value palette, we will most likely be using a linear/hashmap
+                // palette; if so, specify that we need at least 4 bits, as the linear palette
+                // always expects to read 4 bits per entry
+                newPaletteBits = Math.max(4, MathUtil.ceilLog2(newPalette.length));
                 break;
             }
             // linear palette
