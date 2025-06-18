@@ -135,10 +135,11 @@ public final class AntiXrayProcessor {
                 obfuscatedPalette = BitSet.valueOf(EMPTY_LONG_ARRAY);
                 obfuscatedPalette.set(0);
                 presetPalette = new int[presetCount];
-                // search for the palette value in our presets
+                // search for the palette value in our presets to determine
+                // whether the value may also be a preset block
                 int presetIndex = Arrays.binarySearch(presets, value);
                 if (presetIndex < 0) {
-                    // construct new palette
+                    // construct new palette, value not in presets
                     newPalette = new int[1 + presetCount];
                     System.arraycopy(presets, 0, newPalette, 1, presetCount);
                     // specify indices of preset blockstate in the palette
@@ -146,7 +147,7 @@ public final class AntiXrayProcessor {
                         presetPalette[i] = i + 1;
                     }
                 } else {
-                    // construct new palette
+                    // construct new palette, value is in presets
                     newPalette = new int[presetCount];
                     // copy the preset blockstate ids around the value into the new palette array
                     System.arraycopy(presets, 0,
@@ -177,18 +178,22 @@ public final class AntiXrayProcessor {
             case 5, 6, 7, 8: {
                 int paletteSize = VarIntUtil.readVarInt(buf);
                 int[] palette = new int[paletteSize];
+                // the count of the preset states not included in the existing palette,
+                // to figure out whether we need to resize the palette or not
                 int extraPaletteSize = presetCount;
                 for (int i = 0; i < paletteSize; i++) {
                     int value = VarIntUtil.readVarInt(buf);
                     palette[i] = value;
                     // check if this blockstate needs to be obfuscated
                     if (this.obfuscatedStates.get(value)
-                            // don't obfuscate if this is the only replacement state
+                            // don't obfuscate if this value is the only replacement state anyway
                             && (presetCount != 1 || presets[0] != value)) {
+                        // lazy-load obfuscated palette bitset
                         if (obfuscatedPalette == null) {
                             obfuscatedPalette = BitSet.valueOf(EMPTY_LONG_ARRAY);
                             obfuscatedPalette.set(paletteSize); // expand
                         }
+                        // mark current palette entry for obfuscation
                         obfuscatedPalette.set(i);
                     }
                     // check if this blockstate is present in our presets array
@@ -198,7 +203,7 @@ public final class AntiXrayProcessor {
                         // save index of palette entry
                         if (presetPalette == null) {
                             presetPalette = new int[presetCount];
-                            if (paletteSize != 1) { // don't fill if this is only one slot anyway
+                            if (paletteSize != 1) { // don't fill array if there is only one preset anyway
                                 Arrays.fill(presetPalette, -1);
                             }
                         }
@@ -209,16 +214,16 @@ public final class AntiXrayProcessor {
                     return; // nothing to obfuscate, cancel processing
                 }
                 // check if we need to modify the palette; if extraPaletteSize
-                // is zero, all presets are already present in the existing palette and
+                // is zero, all presets are already present in the existing palette, and
                 // we don't need to do anything
                 if (extraPaletteSize > 0) {
                     newPalette = new int[paletteSize + extraPaletteSize];
                     // copy in original palette, don't modify original indices
                     System.arraycopy(palette, 0, newPalette, 0, paletteSize);
-                    // check whether any preset blockstates are present in the existing palette
+                    // check whether any of the preset blockstates are present in the existing palette
                     if (presetPalette != null) {
-                        // some presets present in existing palette, copy over
-                        // remaining presets
+                        // some presets present in existing palette,
+                        // copy over remaining presets
                         for (int i = 0, j = paletteSize; i < presetCount; i++) {
                             if (presetPalette[i] == -1) {
                                 newPalette[j] = presets[i]; // push into new palette
@@ -226,14 +231,16 @@ public final class AntiXrayProcessor {
                             }
                         }
                     } else {
-                        // no presets present, simply copy the preset blockstates
+                        // no presets present at all, just append our preset blockstates into the new palette...
                         System.arraycopy(presets, 0, newPalette, paletteSize, presetCount);
+                        // ... and calculate indices of preset blockstates
                         presetPalette = new int[presetCount];
                         for (int i = 0; i < presetCount; i++) {
                             presetPalette[i] = i + paletteSize;
                         }
                     }
-                    // update bit sizes, but respect that linear palettes always have at least 4 bits
+                    // update bits-per-entry of new palette, but don't allow shrinking the bits-per-entry;
+                    // the linear palette has a hard-coded bits-per-entry of 4
                     int predictedBits = MathUtil.ceilLog2(paletteSize + extraPaletteSize);
                     newPaletteBits = Math.max(predictedBits, newPaletteBits);
                 }
@@ -263,7 +270,7 @@ public final class AntiXrayProcessor {
             entryMask = 0;
             valuesPerWord = 0; // dummy value
             if (storageLength) {
-                // verify storage length if available in buffer
+                // verify storage length in buffer
                 int bufWordCount = VarIntUtil.readVarInt(buf);
                 assert bufWordCount == 0;
             }
@@ -275,7 +282,7 @@ public final class AntiXrayProcessor {
             valuesPerWord = (char) (Long.SIZE / paletteStorageBits);
             int wordCount = (STORAGE_SIZE_3D + valuesPerWord - 1) / valuesPerWord;
             if (storageLength) {
-                // verify storage length if available in buffer
+                // verify storage length in buffer
                 int bufWordCount = VarIntUtil.readVarInt(buf);
                 assert bufWordCount == wordCount;
             }
@@ -297,7 +304,7 @@ public final class AntiXrayProcessor {
             newValuesPerWord = valuesPerWord;
             newStorage = storage;
         } else {
-            // create new storage array
+            // create new empty storage array
             newValuesPerWord = (char) (Long.SIZE / newPaletteBits);
             int newWordCount = (STORAGE_SIZE_3D + newValuesPerWord - 1) / newValuesPerWord;
             newStorage = new long[newWordCount];
@@ -339,7 +346,8 @@ public final class AntiXrayProcessor {
                     }
                     // replace value with value from strategy, after passing through palette
                     newValue = presetPalette[strategy.get()];
-                    // check if we need to write, or if we need to resize anyway
+                    // check if we need to write here; if we need to resize, our new value will get written
+                    // anyway; if the new value is the same as the old value, we can just skip handling
                     if (!resize && newValue != value) {
                         storage[wordIndex] = word
                                 // remove bits from word at position of value
