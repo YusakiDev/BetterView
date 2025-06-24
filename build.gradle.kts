@@ -17,13 +17,13 @@ subprojects {
 
     repositories {
         maven("https://repo.minceraft.dev/public/")
+        maven("https://repo.tcoded.com/releases")
     }
 
     configure<JavaPluginExtension> {
         withSourcesJar()
         toolchain {
             languageVersion = JavaLanguageVersion.of(21)
-            vendor = JvmVendorSpec.ADOPTIUM
         }
     }
 
@@ -47,7 +47,7 @@ subprojects {
     }
 
     tasks.withType<Jar> {
-        archiveBaseName = "${rootProject.name}-${project.name}".lowercase()
+        archiveBaseName.set("${rootProject.name}-${project.name}".lowercase())
 
         // include GPL license file and optional LGPL license file,
         // if the specific subproject is licensed as LGPL (e.g. required for fabric)
@@ -58,7 +58,7 @@ subprojects {
             .filter { it.asFile.exists() }
             .forEach { file ->
                 from(file) {
-                    rename { return@rename "${rootProject.name}_${project.name}_${it}".uppercase() }
+                    rename { name -> "${rootProject.name}_${project.name}_${name}".uppercase() }
                 }
             }
     }

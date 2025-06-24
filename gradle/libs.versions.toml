@@ -7,6 +7,7 @@ pluginyml = "0.6.0"
 runtask = "2.3.1"
 
 # common
+folialib = "0.5.1"
 slf4j = "2.0.17"
 jspecify = "1.0.0"
 checker-qual = "3.49.3"
@@ -53,6 +54,7 @@ runtask-paper = { id = "xyz.jpenilla.run-paper", version.ref = "runtask" }
 
 [libraries]
 # common
+folialib = { module = "com.tcoded:FoliaLib", version.ref = "folialib" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-qual" }

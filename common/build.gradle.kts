@@ -2,6 +2,7 @@ dependencies {
     // declare everything as compileOnly; if any platforms
     // require a specific dependency to be included, this should
     // be done in the specific platform subproject and not here
+    compileOnlyApi(libs.folialib)
     compileOnlyApi(libs.slf4j.api)
     compileOnlyApi(libs.jspecify)
     compileOnlyApi(libs.checker.qual)

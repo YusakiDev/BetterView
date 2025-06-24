@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import com.tcoded.folialib.FoliaLib;
 import org.jspecify.annotations.NullMarked;
 
 import java.nio.file.Path;
@@ -21,6 +22,7 @@ public class BetterViewPlugin extends JavaPlugin {
 
     private final BetterViewManager manager;
     private @MonotonicNonNull NamespacedKey listenerKey;
+    private @MonotonicNonNull FoliaLib foliaLib;
 
     public BetterViewPlugin() {
         Path configPath = this.getDataPath().resolve("config.yml");
@@ -44,13 +46,21 @@ public class BetterViewPlugin extends JavaPlugin {
         // inject packet handling
         PaperNmsInterface.SERVICE.injectPacketHandler(this.manager, this.listenerKey);
 
+        // Initialize FoliaLib
+        this.foliaLib = new FoliaLib(this);
+
         // run task after server has finished starting
-        Bukkit.getScheduler().runTask(this, this.manager::onPostLoad);
+        this.foliaLib.getScheduler().runNextTick(task -> this.manager.onPostLoad());
     }
 
     @Override
     public void onDisable() {
         // uninject packet handling
         PaperNmsInterface.SERVICE.uninjectPacketHandler(this.listenerKey);
+
+        // Cancel all FoliaLib tasks
+        if (this.foliaLib != null) {
+            this.foliaLib.getScheduler().cancelAllTasks();
+        }
     }
 }
